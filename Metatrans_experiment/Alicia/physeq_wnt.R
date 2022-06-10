@@ -85,30 +85,6 @@ meta <- merge(meta, max[,c(1,3)], by = "name", all.x = TRUE)
 
 #
 #### TAXONOMIC ASSIGNATION ####
-##Phylum
-glomP_fun <- tax_glom(phyt_fun, taxrank = 'Phylum', NArm = FALSE)
-dataP_fun <- psmelt(glomP_fun)
-dataP_fun$Phylum <- as.character(dataP_fun$Phylum)
-dataP_fun$Phylum[dataP_fun$Abundance < 0.01] <- "Other"
-
-orderP <- levels(factor(dataP_fun$Phylum))
-orderP <- orderP[! orderP %in% c("Unidentified")]
-orderP <- append(orderP, c("Unidentified"))
-
-set.seed(123)
-ggplot(dataP_fun, aes(x = Sample, y = Abundance, fill = factor(Phylum, levels = orderP))) + 
-  geom_bar(stat = "identity", position = "stack") + 
-  scale_fill_manual(name = "Phylum", values = sample(col_vector, 16)) +
-  theme_minimal() + 
-  theme(legend.position = "bottom", legend.text.align = 0,
-        axis.text.x = element_text(angle = 60, hjust=1, size = 17, color = "black"),
-        axis.text.y = element_text(size = 19, color = "black"),
-        axis.title.x = element_text(size = 19, color = "black"),
-        strip.text.x = element_text(size = 19, color = "black"),
-        axis.title.y = element_text(size = 19, color = "black"),
-        legend.text = element_text(size = 17, color = "black"),
-        legend.title = element_text(size = 19, color = "black")) +
-  xlab("Sample") + ylab("Abundance")
 
 ##Genus
 glomG_fun <- tax_glom(phyt_fun, taxrank = 'Genus', NArm = FALSE)
@@ -149,12 +125,7 @@ ggplot(dataG_fun.plot,
 alpha_fun <- cbind.data.frame(# Hill based taxonomic alpha diversity
                               t.q0 = hill_taxa(tasv_fun, q = 0),
                               t.q1 = hill_taxa(tasv_fun, q = 1),
-                              t.q2 = hill_taxa(tasv_fun, q = 2),
-                              
-                              # Hill based phylogenetic alpha diversity
-                              p.q0 = hill_phylo(tasv_fun, fitGTR_fun$tree, q = 0),
-                              p.q1 = hill_phylo(tasv_fun, fitGTR_fun$tree, q = 1),
-                              p.q2 = hill_phylo(tasv_fun, fitGTR_fun$tree, q = 2))
+                              t.q2 = hill_taxa(tasv_fun, q = 2))
 
 alpha_fun$Sample_ID <- row.names(alpha_fun)
 
