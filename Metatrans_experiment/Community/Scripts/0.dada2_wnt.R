@@ -144,7 +144,7 @@ taxa.cut <- assignTaxonomy(seqtab.nochim,
 #### SAVE DATA ####
 save.image("dada2_wnt.RData")
 
-saveRDS(taxa.cut, "tax_cut.rds")
-saveRDS(seqtab.nochim, "ASV_cut.rds")
-write.table(track.cut, "track.cut.txt", sep = "\t", dec = ",")
+saveRDS(taxa.cut, "tax_wnt.rds")
+saveRDS(seqtab.nochim, "ASV_wnt.rds")
+write.table(track.wnt, "track_wnt.txt", sep = "\t", dec = ",")
 
