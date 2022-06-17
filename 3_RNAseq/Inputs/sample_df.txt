@@ -1,73 +1,144 @@
-Sample_ID	Origin	Farming	Condition	Variety
-LM-CONV-Control	LM	CONV	Control	Tempranillo
-LM-CONV-18C	LM	CONV	18C	Tempranillo
-LM-CONV-NH4	LM	CONV	NH4	Tempranillo
-LM-CONV-SO2	LM	CONV	SO2	Tempranillo
-LM-ECO-Control	LM	ECO	Control	Tempranillo
-LM-ECO-18C	LM	ECO	18C	Tempranillo
-LM-ECO-NH4	LM	ECO	NH4	Tempranillo
-LM-ECO-SO2	LM	ECO	SO2	Tempranillo
-M-CONV-Control	M	CONV	Control	Tempranillo
-M-CONV-18C	M	CONV	18C	Tempranillo
-M-CONV-NH4	M	CONV	NH4	Tempranillo
-M-CONV-SO2	M	CONV	SO2	Tempranillo
-M-ECO-Control	M	ECO	Control	Tempranillo
-M-ECO-18C	M	ECO	18C	Tempranillo
-M-ECO-NH4	M	ECO	NH4	Tempranillo
-M-ECO-SO2	M	ECO	SO2	Tempranillo
-R1-CONV-Control	R1	CONV	Control	Tempranillo
-R1-CONV-18C	R1	CONV	18C	Tempranillo
-R1-CONV-NH4	R1	CONV	NH4	Tempranillo
-R1-CONV-SO2	R1	CONV	SO2	Tempranillo
-R1-ECO-Control	R1	ECO	Control	Tempranillo
-R1-ECO-18C	R1	ECO	18C	Tempranillo
-R1-ECO-NH4	R1	ECO	NH4	Tempranillo
-R1-ECO-SO2	R1	ECO	SO2	Tempranillo
-R2-CONV-Control	R2	CONV	Control	Tempranillo
-R2-CONV-18C	R2	CONV	18C	Tempranillo
-R2-CONV-NH4	R2	CONV	NH4	Tempranillo
-R2-CONV-SO2	R2	CONV	SO2	Tempranillo
-R2-ECO-Control	R2	ECO	Control	Tempranillo
-R2-ECO-18C	R2	ECO	18C	Tempranillo
-R2-ECO-NH4	R2	ECO	NH4	Tempranillo
-R2-ECO-SO2	R2	ECO	SO2	Tempranillo
-R3A-CONV-Control	R3A	CONV	Control	Tempranillo
-R3A-CONV-18C	R3A	CONV	18C	Tempranillo
-R3A-CONV-NH4	R3A	CONV	NH4	Tempranillo
-R3A-CONV-SO2	R3A	CONV	SO2	Tempranillo
-R3A-ECO-Control	R3A	ECO	Control	Tempranillo
-R3A-ECO-18C	R3A	ECO	18C	Tempranillo
-R3A-ECO-NH4	R3A	ECO	NH4	Tempranillo
-R3A-ECO-SO2	R3A	ECO	SO2	Tempranillo
-R3B-CONV-Control	R3B	CONV	Control	Tempranillo
-R3B-CONV-18C	R3B	CONV	18C	Tempranillo
-R3B-CONV-NH4	R3B	CONV	NH4	Tempranillo
-R3B-CONV-SO2	R3B	CONV	SO2	Tempranillo
-R3B-ECO-Control	R3B	ECO	Control	Tempranillo
-R3B-ECO-18C	R3B	ECO	18C	Tempranillo
-R3B-ECO-NH4	R3B	ECO	NH4	Tempranillo
-R3B-ECO-SO2	R3B	ECO	SO2	Tempranillo
-R3C-CONV-Control	R3C	CONV	Control	Tempranillo
-R3C-CONV-18C	R3C	CONV	18C	Tempranillo
-R3C-CONV-NH4	R3C	CONV	NH4	Tempranillo
-R3C-CONV-SO2	R3C	CONV	SO2	Tempranillo
-R3C-ECO-Control	R3C	ECO	Control	Tempranillo
-R3C-ECO-18C	R3C	ECO	18C	Tempranillo
-R3C-ECO-NH4	R3C	ECO	NH4	Tempranillo
-R3C-ECO-SO2	R3C	ECO	SO2	Tempranillo
-RdG-CONV-Control	RdG	CONV	Control	Garnacha
-RdG-CONV-18C	RdG	CONV	18C	Garnacha
-RdG-CONV-NH4	RdG	CONV	NH4	Garnacha
-RdG-CONV-SO2	RdG	CONV	SO2	Garnacha
-RdG-ECO-Control	RdG	ECO	Control	Tempranillo
-RdG-ECO-18C	RdG	ECO	18C	Tempranillo
-RdG-ECO-NH4	RdG	ECO	NH4	Tempranillo
-RdG-ECO-SO2	RdG	ECO	SO2	Tempranillo
-VLP-CONV-Control	VLP	CONV	Control	Tempranillo
-VLP-CONV-18C	VLP	CONV	18C	Tempranillo
-VLP-CONV-NH4	VLP	CONV	NH4	Tempranillo
-VLP-CONV-SO2	VLP	CONV	SO2	Tempranillo
-VLP-ECO-Control	VLP	ECO	Control	Tempranillo
-VLP-ECO-18C	VLP	ECO	18C	Tempranillo
-VLP-ECO-NH4	VLP	ECO	NH4	Tempranillo
-VLP-ECO-SO2	VLP	ECO	SO2	Tempranillo
+Sample_ID	Origin	Farming	Condition	Variety	Dataset
+LM-CONV-Control	LM	CONV	Control	Tempranillo	SGM
+LM-CONV-18C	LM	CONV	18C	Tempranillo	SGM
+LM-CONV-NH4	LM	CONV	NH4	Tempranillo	SGM
+LM-CONV-SO2	LM	CONV	SO2	Tempranillo	SGM
+LM-ECO-Control	LM	ECO	Control	Tempranillo	SGM
+LM-ECO-18C	LM	ECO	18C	Tempranillo	SGM
+LM-ECO-NH4	LM	ECO	NH4	Tempranillo	SGM
+LM-ECO-SO2	LM	ECO	SO2	Tempranillo	SGM
+M-CONV-Control	M	CONV	Control	Tempranillo	SGM
+M-CONV-18C	M	CONV	18C	Tempranillo	SGM
+M-CONV-NH4	M	CONV	NH4	Tempranillo	SGM
+M-CONV-SO2	M	CONV	SO2	Tempranillo	SGM
+M-ECO-Control	M	ECO	Control	Tempranillo	SGM
+M-ECO-18C	M	ECO	18C	Tempranillo	SGM
+M-ECO-NH4	M	ECO	NH4	Tempranillo	SGM
+M-ECO-SO2	M	ECO	SO2	Tempranillo	SGM
+R1-CONV-Control	R1	CONV	Control	Tempranillo	SGM
+R1-CONV-18C	R1	CONV	18C	Tempranillo	SGM
+R1-CONV-NH4	R1	CONV	NH4	Tempranillo	SGM
+R1-CONV-SO2	R1	CONV	SO2	Tempranillo	SGM
+R1-ECO-Control	R1	ECO	Control	Tempranillo	SGM
+R1-ECO-18C	R1	ECO	18C	Tempranillo	SGM
+R1-ECO-NH4	R1	ECO	NH4	Tempranillo	SGM
+R1-ECO-SO2	R1	ECO	SO2	Tempranillo	SGM
+R2-CONV-Control	R2	CONV	Control	Tempranillo	SGM
+R2-CONV-18C	R2	CONV	18C	Tempranillo	SGM
+R2-CONV-NH4	R2	CONV	NH4	Tempranillo	SGM
+R2-CONV-SO2	R2	CONV	SO2	Tempranillo	SGM
+R2-ECO-Control	R2	ECO	Control	Tempranillo	SGM
+R2-ECO-18C	R2	ECO	18C	Tempranillo	SGM
+R2-ECO-NH4	R2	ECO	NH4	Tempranillo	SGM
+R2-ECO-SO2	R2	ECO	SO2	Tempranillo	SGM
+R3A-CONV-Control	R3A	CONV	Control	Tempranillo	SGM
+R3A-CONV-18C	R3A	CONV	18C	Tempranillo	SGM
+R3A-CONV-NH4	R3A	CONV	NH4	Tempranillo	SGM
+R3A-CONV-SO2	R3A	CONV	SO2	Tempranillo	SGM
+R3A-ECO-Control	R3A	ECO	Control	Tempranillo	SGM
+R3A-ECO-18C	R3A	ECO	18C	Tempranillo	SGM
+R3A-ECO-NH4	R3A	ECO	NH4	Tempranillo	SGM
+R3A-ECO-SO2	R3A	ECO	SO2	Tempranillo	SGM
+R3B-CONV-Control	R3B	CONV	Control	Tempranillo	SGM
+R3B-CONV-18C	R3B	CONV	18C	Tempranillo	SGM
+R3B-CONV-NH4	R3B	CONV	NH4	Tempranillo	SGM
+R3B-CONV-SO2	R3B	CONV	SO2	Tempranillo	SGM
+R3B-ECO-Control	R3B	ECO	Control	Tempranillo	SGM
+R3B-ECO-18C	R3B	ECO	18C	Tempranillo	SGM
+R3B-ECO-NH4	R3B	ECO	NH4	Tempranillo	SGM
+R3B-ECO-SO2	R3B	ECO	SO2	Tempranillo	SGM
+R3C-CONV-Control	R3C	CONV	Control	Tempranillo	SGM
+R3C-CONV-18C	R3C	CONV	18C	Tempranillo	SGM
+R3C-CONV-NH4	R3C	CONV	NH4	Tempranillo	SGM
+R3C-CONV-SO2	R3C	CONV	SO2	Tempranillo	SGM
+R3C-ECO-Control	R3C	ECO	Control	Tempranillo	SGM
+R3C-ECO-18C	R3C	ECO	18C	Tempranillo	SGM
+R3C-ECO-NH4	R3C	ECO	NH4	Tempranillo	SGM
+R3C-ECO-SO2	R3C	ECO	SO2	Tempranillo	SGM
+RdG-CONV-Control	RdG	CONV	Control	Garnacha	SGM
+RdG-CONV-18C	RdG	CONV	18C	Garnacha	SGM
+RdG-CONV-NH4	RdG	CONV	NH4	Garnacha	SGM
+RdG-CONV-SO2	RdG	CONV	SO2	Garnacha	SGM
+RdG-ECO-Control	RdG	ECO	Control	Tempranillo	SGM
+RdG-ECO-18C	RdG	ECO	18C	Tempranillo	SGM
+RdG-ECO-NH4	RdG	ECO	NH4	Tempranillo	SGM
+RdG-ECO-SO2	RdG	ECO	SO2	Tempranillo	SGM
+VLP-CONV-Control	VLP	CONV	Control	Tempranillo	SGM
+VLP-CONV-18C	VLP	CONV	18C	Tempranillo	SGM
+VLP-CONV-NH4	VLP	CONV	NH4	Tempranillo	SGM
+VLP-CONV-SO2	VLP	CONV	SO2	Tempranillo	SGM
+VLP-ECO-Control	VLP	ECO	Control	Tempranillo	SGM
+VLP-ECO-18C	VLP	ECO	18C	Tempranillo	SGM
+VLP-ECO-NH4	VLP	ECO	NH4	Tempranillo	SGM
+VLP-ECO-SO2	VLP	ECO	SO2	Tempranillo	SGM
+ITS-127	RdG	CONV	Control	Garnacha	GM
+ITS-128	RdG	ECO	Control	Garnacha	GM
+ITS-129	M	ECO	Control	Tempranillo	GM
+ITS-130	M	CONV	Control	Tempranillo	GM
+ITS-131	LM	ECO	Control	Tempranillo	GM
+ITS-132	LM	CONV	Control	Tempranillo	GM
+ITS-133	VLP	ECO	Control	Tempranillo	GM
+ITS-134	VLP	CONV	Control	Tempranillo	GM
+ITS-135	R1	ECO	Control	Tempranillo	GM
+ITS-136	R1	CONV	Control	Tempranillo	GM
+ITS-137	R2	ECO	Control	Tempranillo	GM
+ITS-138	R2	CONV	Control	Tempranillo	GM
+ITS-139	R3A	ECO	Control	Tempranillo	GM
+ITS-140	R3A	CONV	Control	Tempranillo	GM
+ITS-141	R3B	ECO	Control	Tempranillo	GM
+ITS-142	R3B	CONV	Control	Tempranillo	GM
+ITS-143	R3C	ECO	Control	Tempranillo	GM
+ITS-144	R3C	CONV	Control	Tempranillo	GM
+ITS-145	RdG	CONV	18C	Garnacha	GM
+ITS-146	RdG	ECO	18C	Garnacha	GM
+ITS-147	M	ECO	18C	Tempranillo	GM
+ITS-148	M	CONV	18C	Tempranillo	GM
+ITS-149	LM	ECO	18C	Tempranillo	GM
+ITS-150	LM	CONV	18C	Tempranillo	GM
+ITS-151	VLP	ECO	18C	Tempranillo	GM
+ITS-152	VLP	CONV	18C	Tempranillo	GM
+ITS-153	R1	ECO	18C	Tempranillo	GM
+ITS-154	R1	CONV	18C	Tempranillo	GM
+ITS-155	R2	ECO	18C	Tempranillo	GM
+ITS-156	R2	CONV	18C	Tempranillo	GM
+ITS-157	R3A	ECO	18C	Tempranillo	GM
+ITS-158	R3B	ECO	18C	Tempranillo	GM
+ITS-159	R3B	CONV	18C	Tempranillo	GM
+ITS-160	R3C	ECO	18C	Tempranillo	GM
+ITS-161	R3C	CONV	18C	Tempranillo	GM
+ITS-162	RdG	CONV	NH4	Garnacha	GM
+ITS-163	RdG	ECO	NH4	Garnacha	GM
+ITS-164	M	ECO	NH4	Tempranillo	GM
+ITS-165	M	CONV	NH4	Tempranillo	GM
+ITS-166	LM	ECO	NH4	Tempranillo	GM
+ITS-167	LM	CONV	NH4	Tempranillo	GM
+ITS-168	VLP	ECO	NH4	Tempranillo	GM
+ITS-169	VLP	CONV	NH4	Tempranillo	GM
+ITS-170	R1	ECO	NH4	Tempranillo	GM
+ITS-171	R1	CONV	NH4	Tempranillo	GM
+ITS-172	R2	ECO	NH4	Tempranillo	GM
+ITS-173	R2	CONV	NH4	Tempranillo	GM
+ITS-174	R3A	ECO	NH4	Tempranillo	GM
+ITS-175	R3A	CONV	NH4	Tempranillo	GM
+ITS-176	R3B	ECO	NH4	Tempranillo	GM
+ITS-177	R3B	CONV	NH4	Tempranillo	GM
+ITS-178	R3C	ECO	NH4	Tempranillo	GM
+ITS-179	R3C	CONV	NH4	Tempranillo	GM
+ITS-180	RdG	CONV	SO2	Garnacha	GM
+ITS-181	RdG	ECO	SO2	Garnacha	GM
+ITS-182	M	ECO	SO2	Tempranillo	GM
+ITS-183	M	CONV	SO2	Tempranillo	GM
+ITS-184	LM	ECO	SO2	Tempranillo	GM
+ITS-185	LM	CONV	SO2	Tempranillo	GM
+ITS-186	VLP	ECO	SO2	Tempranillo	GM
+ITS-187	VLP	CONV	SO2	Tempranillo	GM
+ITS-188	R1	ECO	SO2	Tempranillo	GM
+ITS-189	R1	CONV	SO2	Tempranillo	GM
+ITS-190	R2	ECO	SO2	Tempranillo	GM
+ITS-191	R2	CONV	SO2	Tempranillo	GM
+ITS-192	R3A	ECO	SO2	Tempranillo	GM
+ITS-193	R3A	CONV	SO2	Tempranillo	GM
+ITS-194	R3B	ECO	SO2	Tempranillo	GM
+ITS-195	R3B	CONV	SO2	Tempranillo	GM
+ITS-196	R3C	ECO	SO2	Tempranillo	GM
+ITS-197	R3C	CONV	SO2	Tempranillo	GM
