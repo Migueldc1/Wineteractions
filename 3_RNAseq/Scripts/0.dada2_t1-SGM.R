@@ -140,11 +140,11 @@ track.cut <- cbind.data.frame(track.cut, perc = track.cut[,6]*100/track.cut[,1])
 #
 #### ASSIGN TAXONOMY ####
 taxa.cut <- assignTaxonomy(seqtab.nochim, 
-                           "Intputs/Databases/sh_general_release_dynamic_10.05.2021.fasta")
+                           "Inputs/Databases/sh_general_release_dynamic_10.05.2021.fasta")
 
 #
 #### SAVE DATA ####
-save.image("Outputs/dada2_t1-SGM.RData")
+save.image("dada2_t1-SGM.RData")
 
 saveRDS(taxa.cut, "Outputs/tax_t1-SGM.rds")
 saveRDS(seqtab.nochim, "Outputs/ASV_t1-SGM.rds")

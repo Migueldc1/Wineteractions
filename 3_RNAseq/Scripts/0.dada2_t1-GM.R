@@ -3,7 +3,7 @@
 # Project: Wineteractions - ITS sequence analysis of T1-GM samples
 
 # Set the project location as working directory
-setwd("C:/Users/Laboratorio14/OneDrive - Universidad Complutense de Madrid (UCM)/Wineteractions/GitHub/Wineteractions/3_RNAseq/")
+setwd("C:/Users/Miguel de Celis/OneDrive - Universidad Complutense de Madrid (UCM)/Wineteractions/GitHub/Wineteractions/3_RNAseq/")
 
 #### LIBRARIES ####
 library(dada2)
@@ -90,7 +90,7 @@ plotQualityProfile(fnRs.cut[sample(1:length(sample.names), 3)])
 filtFs <- file.path(path, "Remove.primers/R1/filtered", basename(fnFs))
 filtRs <- file.path(path, "Remove.primers/R2/filtered", basename(fnRs))
 
-out.cut <- filterAndTrim(fnFs.cut, filtFs, fnRs.cut, filtRs, truncLen = c(240,200),
+out.cut <- filterAndTrim(fnFs.cut, filtFs, fnRs.cut, filtRs, truncLen = c(200,150),
                          maxN = 0, maxEE = c(2,2), truncQ = 2, rm.phix = TRUE,
                          compress = TRUE, verbose = TRUE) 
 head(out.cut)
@@ -109,7 +109,7 @@ dadaRs <- dada(filtRs, err = errR, multithread = FALSE)
 
 #
 #### MERGE PAIRED READS ####
-mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose = TRUE)
+mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose = TRUE, minOverlap = 7)
 
 #
 #### CONSTRUCT SEQUENCE TABLE ####
@@ -118,7 +118,7 @@ dim(seqtab)
 hist(nchar(getSequences(seqtab)))
 
 row.names(seqtab) <- sapply(strsplit(row.names(seqtab), "_"), `[`, 1)
-row.names(seqtab) <- gsub("NGS025-21-RUN-2-", "", row.names(seqtab))
+row.names(seqtab) <- gsub("NGS025-21-ITS2-", "ITS-", row.names(seqtab))
 
 #
 #### REMOVE CHIMERAS ####
@@ -140,11 +140,11 @@ track.cut <- cbind.data.frame(track.cut, perc = track.cut[,6]*100/track.cut[,1])
 #
 #### ASSIGN TAXONOMY ####
 taxa.cut <- assignTaxonomy(seqtab.nochim, 
-                           "Intputs/Databases/sh_general_release_dynamic_10.05.2021.fasta")
+                           "Inputs/Databases/sh_general_release_dynamic_10.05.2021.fasta")
 
 #
 #### SAVE DATA ####
-save.image("Outputs/dada2_t1-GM.RData")
+save.image("dada2_t1-GM.RData")
 
 saveRDS(taxa.cut, "Outputs/tax_t1-GM.rds")
 saveRDS(seqtab.nochim, "Outputs/ASV_t1-GM.rds")
