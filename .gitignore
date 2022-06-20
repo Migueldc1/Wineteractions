@@ -2,8 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-.gitignore
-Wineteractions.Rproj 
 3_RNAseq/Inputs/ITS_reads
 3_RNAseq/Inputs/Databases
 3_RNAseq/Inputs/bracken.report.txt
