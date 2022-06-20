@@ -135,7 +135,3 @@ ggplot(asv.t_plot,
   guides(fill = guide_legend(nrow = 3)) + facet_wrap(~Study + Origin, nrow = 3)
 
 #
-#### SAVE DATA ####
-save.image("comm.analysis_wnt.Rdata")
-
-#
