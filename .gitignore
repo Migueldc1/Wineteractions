@@ -2,6 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+1_Reg-Farm/Inputs/ITS_reads
+1_Reg-Farm/Inputs/Databases
+1_Reg-Farm/Outputs/track_t0-GM.txt
+1_Reg-Farm/Outputs/Figures/*.pdf
+1_Reg-Farm/Outputs/Figures/*.svg
+1_Reg-Farm/*.RData
 3_RNAseq/Inputs/ITS_reads
 3_RNAseq/Inputs/Databases
 3_RNAseq/Inputs/bracken.report.txt
@@ -10,7 +16,4 @@
 3_RNAseq/Outputs/track_t1-SGM.txt
 3_RNAseq/Outputs/Figures/*.pdf
 3_RNAseq/Outputs/Figures/*.svg
-3_RNAseq/dada2_t1-SGM.RData
-3_RNAseq/dada2_t1-GM.RData
-3_RNAseq/dada2_t1-RNA.RData
-3_RNAseq/comm.analysis_wnt.Rdata
+3_RNAseq/*.RData
