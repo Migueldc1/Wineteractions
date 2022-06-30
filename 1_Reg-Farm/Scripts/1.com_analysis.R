@@ -63,8 +63,10 @@ sample_df <- read.table("Inputs/sample_df.tot.txt", sep = "\t", header = TRUE)
 row.names(sample_df) <- sample_df$Seq_ID
 sample_df$Condition <- factor(sample_df$Condition, levels = c("Control", "18C", "NH4", "SO2"))
 sample_df$Origin <- factor(sample_df$Origin, levels = c("RdG", "VLP", "LM", "M", "R1", "R2", "R3A", "R3B", "R3C"))
-sample_df$Region <- factor(sample_df$Region, levels = c("Ribera del Guadiana", "Valdepeña", "La Mancha", "Madrid", 
+sample_df$Region <- factor(sample_df$Region, levels = c("Ribera del Guadiana", "Valdepenas", "La Mancha", "Madrid", 
                                                         "La Rioja"))
+
+sample_df <- subset(sample_df, Stage == "T0")
 
 #
 #### TAXONOMIC EXPLORATION ####
@@ -286,6 +288,74 @@ ggplot(asv.t_plot.0[asv.t_plot.0$Genus %in% sigtab_GM_man.tot$Genus,],
         legend.title = element_text(size = 15, color = "black")) +
   xlab("Sample") + ylab("Abundance") +
   guides(fill = guide_legend(nrow = 3))
+
+
+
+#
+#### MUST ANALYSIS ####
+must_df <- subset(sample_df[,c(2:6,8:19)], Stage == "T0")[,-4]
+
+must_pca <- prcomp(must_df[,c(8:10,12,13)], scale = F)
+
+must_pca.plot <- must_pca$x
+must_pca.plot <- merge(must_df, must_pca.plot, by = "row.names")
+
+ggplot(must_pca.plot) + 
+  geom_point(aes(x = PC1, y = PC2, color = Origin, shape = Condition), size = 4) +
+  scale_color_manual(values = c("#2ac219", "#1949c2", "#dba54d", "#e02424", 
+                                "#c124e0", "#89209e", "#a6165c", "#750f41", "#5c105e")) +
+  xlab(paste("PC1: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[1], "%", sep = "")) +
+  ylab(paste("PC2: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[2], "%", sep = "")) +
+  theme_bw() +
+  theme(axis.text.y = element_text(size = 17, color = "black"),
+        axis.title.x = element_text(size = 17, color = "black"),
+        axis.title.y = element_text(size = 17, color = "black"),
+        legend.text = element_text(size = 20, color = "black"),
+        legend.title = element_text(size = 20, color = "black"),
+        axis.text.x = element_text(size = 17, color = "black"))
+
+#
+#### CONSTRAINED ANALYSIS ####
+
+adonis2(as.matrix(bray_GM) ~ ., sample_df[,c(10:16)], permutations = 1000)
+cap_GM <- capscale(as.matrix(bray_GM) ~ ., sample_df[,c(10:16)], na.action = na.omit)
+
+anova(cap_GM)
+RsquareAdj(cap_GM)
+
+arrowmat <- rbind.data.frame(scores(cap_GM, display = "bp"),
+                             scores(cap_GM, display = "cn"))
+
+arrowmat$Sample <- row.names(arrowmat)
+
+sitemat <- as.data.frame(scores(cap_GM, display = "sites"))
+sitemat$Seq_ID <- row.names(sitemat)
+sitemat <- merge(sitemat, sample_df, by = "Seq_ID")
+
+summary(cap_GM)$cont
+
+ggplot() + 
+  geom_point(data = sitemat, aes(x = CAP1, y = CAP2, color = Origin), size = 3) +
+  geom_segment(data = arrowmat, aes(x = 0, y = 0, xend = CAP1*2, yend = CAP2*2), 
+               arrow = arrow(length = unit(0.2,"cm")), size = 1, alpha = 0.8) + 
+  geom_text(data = arrowmat, aes(x = CAP1*2.5, y = CAP2*2.5, label = Sample), size = 5) +
+  scale_color_manual(values = c("#2ac219", "#1949c2", "#dba54d", "#e02424", 
+                                "#c124e0", "#89209e", "#a6165c", "#750f41", "#5c105e")) +
+  theme_bw() +
+  theme(axis.text.y = element_text(size = 17, color = "black"),
+        axis.title.x = element_text(size = 17, color = "black"),
+        axis.title.y = element_text(size = 17, color = "black"),
+        legend.text = element_text(size = 17, color = "black"),
+        legend.title = element_text(size = 17, color = "black"),
+        axis.text.x = element_text(size = 17, color = "black")) +
+  xlab("CAP1 (8.05%)") + ylab("CAP2 (3.18%)") + xlim(-1.6,1.7)
+
+
+
+
+
+
+
 
 
 
