@@ -15,6 +15,12 @@ library(hillR)
 library(phyloseq)
 library(DESeq2)
 library(agricolae)
+library(raster)
+library(rnaturalearth)
+library(sf)
+library(ggnewscale)
+
+load("com_analysis.RData")
 
 #
 #### FUNCTIONS ####
@@ -59,14 +65,70 @@ tax_GM.un <- set_unid(tax_GM)
 tax_GM[is.na(tax_GM)] <- "Unidentified"
 
 ## SAMPLE DATA
-sample_df <- read.table("Inputs/sample_df.tot.txt", sep = "\t", header = TRUE)
+sample_df <- read.table("Inputs/NGM_initial.txt", sep = "\t", header = TRUE)
 row.names(sample_df) <- sample_df$Seq_ID
 sample_df$Condition <- factor(sample_df$Condition, levels = c("Control", "18C", "NH4", "SO2"))
-sample_df$Origin <- factor(sample_df$Origin, levels = c("RdG", "VLP", "LM", "M", "R1", "R2", "R3A", "R3B", "R3C"))
-sample_df$Region <- factor(sample_df$Region, levels = c("Ribera del Guadiana", "Valdepenas", "La Mancha", "Madrid", 
-                                                        "La Rioja"))
+sample_df$Origin <- factor(sample_df$Origin, levels = c("RdG", "VLP", "LM", "M", "R1", "R2", "R3A", 
+                                                        "R3B", "R3C"))
+sample_df$Region <- factor(sample_df$Region, levels = c("Ribera del Guadiana", "Valdepeñas", "La Mancha",
+                                                        "Madrid", "Rioja"))
 
-sample_df <- subset(sample_df, Stage == "T0")
+
+#
+#### SAMPLING MAP (Temperature) ####
+
+# Load WorldClim MAT data and crop the Spanish area
+climate1 <- getData("worldclim", var = "bio", res = 0.5, lon = -3.703790, 
+                   lat = 40.416775)
+climate2 <- getData("worldclim", var = "bio", res = 0.5, lon = 3.703790, 
+                   lat = 40.416775)
+climate <- mosaic(climate1, climate2)
+climate_crop <- crop(climate, extent(-10, 5, 35, 44))
+
+tmean_spain_df <- as.data.frame(climate_crop, xy = TRUE, na.rm = TRUE)
+
+# Load the Spanish community boundaries
+spain <- getData("GADM", country = "ESP", level = 1)
+
+sp.lim <- data.frame(ylim = c(35, 44), xlim = c(-10, 5))
+sp.gadm <- st_as_sf(spain)
+sp.bbox <- st_bbox(c(xmin = sp.lim$xlim[1],
+                     xmax = sp.lim$xlim[2],
+                     ymin = sp.lim$ylim[1],
+                     ymax = sp.lim$ylim[2]))
+sp.gadm <- st_crop(sp.gadm, sp.bbox)
+
+# Draw the map
+ggplot() +
+  geom_raster(data = tmean_spain_df, aes(x = x, y = y, fill = layer.1/10)) +
+  scale_fill_gradient2(name = "Temperature (°C)", low = "blue", mid = "white", high = "red", midpoint = 10,
+                       limits = c(-4, 19.9)) +
+  geom_sf(data = sp.gadm, fill = NA, color = "black") +
+  coord_sf(ylim = sp.lim$ylim, xlim = sp.lim$xlim) +
+  new_scale("fill") +
+  geom_point(data = sample_df, aes(x = Longitude, y = Latitude, fill = Origin),
+             colour = "black", shape = 21, size = 2.5, stroke = 1.5) +
+  scale_fill_manual(values = c("#2ac219", "#1949c2", "#dba54d", "#e02424", 
+                                "#c124e0", "#89209e", "#a6165c", "#750f41", "#5c105e")) +
+  theme_void()
+
+#
+#### GEOGRAPHIC DISTANCES ####
+coord_df <- sample_df[,c(1,9:8)]
+row.names(coord_df) <- coord_df[,1]
+coord_df <- coord_df[,-1]
+
+coord_dist <- data.frame(matrix(nrow = nrow(coord_df), ncol = nrow(coord_df)), row.names = row.names(coord_df))
+colnames(coord_dist) <- row.names(coord_dist)
+
+for (row in 1:nrow(coord_dist)) {
+  for (col in 1:ncol(coord_dist)) {
+    
+    coord_dist[row,col] <- round(distGeo(c(coord_df$Longitude[row], coord_df$Latitude[row]), 
+                                         c(coord_df$Longitude[col], coord_df$Latitude[col]))/1000, 2)
+  }
+  
+}
 
 #
 #### TAXONOMIC EXPLORATION ####
@@ -172,7 +234,6 @@ t.test(subset(alpha_GM.plot, variable == "t.q2" & Management == "ECO")$value,
 
 #
 #### BETA DIVERSITY ANALYSIS ####
-
 bray_GM <- vegdist(t(asv.t_GM), method = "bray")
 
 set.seed(1)
@@ -232,6 +293,41 @@ adonis2(bray_GM ~ group, data = sample_df)
 
 
 #
+#### CORRELATION BETWEEN GEOGRAPHIC DISTANCE AND ENVIRONTMENT AND COMMUNITY ####
+env_dist <- as.matrix(dist(apply(sample_df[,12:17], 2, function(x) (x-min(x))/(max(x)-min(x)))))
+
+env_geo <- mantel(env_dist, coord_dist, method = "spearman", permutations = 9999, na.rm = TRUE)
+env_geo
+
+env_geo.plot <- merge(melt(as.matrix(env_dist)), melt(as.matrix(coord_dist)), by = c("Var1", "Var2"))
+colnames(env_geo.plot) <- c("Var1", "Var2", "env_dist", "coord_dist")
+
+ggplot(env_geo.plot) +
+  geom_point(aes(x = coord_dist, y = env_dist)) +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 24, color = "black"),
+        axis.text.x = element_text(size = 22, color = "black"),
+        axis.title.y = element_text(size = 24, color = "black"),
+        axis.text.y = element_text(size = 22, color = "black")) +
+  xlab("Geographic Distance") + ylab("Environmental Distance") +
+  annotate("text", label = "p = 0.571, p-value < 0.001", x = 400, y = 2, size = 7)
+
+com_geo <- mantel(bray_GM, coord_dist, method = "spearman", permutations = 9999, na.rm = TRUE)
+com_geo
+
+com_geo.plot <- merge(melt(as.matrix(bray_GM)), melt(as.matrix(coord_dist)), by = c("Var1", "Var2"))
+colnames(com_geo.plot) <- c("Var1", "Var2", "com_dist", "coord_dist")
+
+ggplot(com_geo.plot) +
+  geom_point(aes(x = coord_dist, y = com_dist)) +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 24, color = "black"),
+        axis.text.x = element_text(size = 22, color = "black"),
+        axis.title.y = element_text(size = 24, color = "black"),
+        axis.text.y = element_text(size = 22, color = "black")) +
+  xlab("Geographic Distance") + ylab("Community Distance") +
+  annotate("text", label = "p = -0.034, p-value = 0.761", x = 400, y = 0.8, size = 7)
+
 #### DIFERENTIAL ABUNDANCE ANALYSIS ####
 asv.t_GM.p <- melt(asv.t_GM)
 colnames(asv.t_GM.p) <- c("Id", "Seq_ID", "value")
@@ -293,32 +389,48 @@ ggplot(asv.t_plot.0[asv.t_plot.0$Genus %in% sigtab_GM_man.tot$Genus,],
 
 #
 #### MUST ANALYSIS ####
-must_df <- subset(sample_df[,c(2:6,8:19)], Stage == "T0")[,-4]
+must_df <- sample_df[,c(2:6, 12:17)]
 
-must_pca <- prcomp(must_df[,c(8:10,12,13)], scale = F)
+must_pca <- prcomp(must_df[,c(6:7,9:11)], scale = TRUE)
 
 must_pca.plot <- must_pca$x
 must_pca.plot <- merge(must_df, must_pca.plot, by = "row.names")
 
 ggplot(must_pca.plot) + 
-  geom_point(aes(x = PC1, y = PC2, color = Origin, shape = Condition), size = 4) +
+  geom_point(aes(x = PC1, y = PC2, color = Origin, shape = Farming), size = 4) +
   scale_color_manual(values = c("#2ac219", "#1949c2", "#dba54d", "#e02424", 
                                 "#c124e0", "#89209e", "#a6165c", "#750f41", "#5c105e")) +
   xlab(paste("PC1: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[1], "%", sep = "")) +
   ylab(paste("PC2: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[2], "%", sep = "")) +
   theme_bw() +
-  theme(axis.text.y = element_text(size = 17, color = "black"),
-        axis.title.x = element_text(size = 17, color = "black"),
-        axis.title.y = element_text(size = 17, color = "black"),
-        legend.text = element_text(size = 20, color = "black"),
-        legend.title = element_text(size = 20, color = "black"),
-        axis.text.x = element_text(size = 17, color = "black"))
+  theme(axis.text.y = element_text(size = 22, color = "black"),
+        axis.title.x = element_text(size = 24, color = "black"),
+        axis.title.y = element_text(size = 24, color = "black"),
+        legend.text = element_text(size = 24, color = "black"),
+        legend.title = element_text(size = 22, color = "black"),
+        axis.text.x = element_text(size = 22, color = "black"))
+
+ggplot(must_pca.plot) + 
+  geom_point(aes(x = PC1, y = PC2, color = Condition, shape = Farming), size = 4) +
+  scale_color_manual(values = c("#2ac219", "#1949c2", "#dba54d", "#e02424", 
+                                "#c124e0", "#89209e", "#a6165c", "#750f41", "#5c105e")) +
+  xlab(paste("PC1: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[1], "%", sep = "")) +
+  ylab(paste("PC2: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[2], "%", sep = "")) +
+  theme_bw() +
+  theme(axis.text.y = element_text(size = 22, color = "black"),
+        axis.title.x = element_text(size = 24, color = "black"),
+        axis.title.y = element_text(size = 24, color = "black"),
+        legend.text = element_text(size = 24, color = "black"),
+        legend.title = element_text(size = 22, color = "black"),
+        axis.text.x = element_text(size = 22, color = "black"))
+
+must_pca
 
 #
 #### CONSTRAINED ANALYSIS ####
 
-adonis2(as.matrix(bray_GM) ~ ., sample_df[,c(10:16)], permutations = 1000)
-cap_GM <- capscale(as.matrix(bray_GM) ~ ., sample_df[,c(10:16)], na.action = na.omit)
+adonis2(as.matrix(bray_GM) ~ ., sample_df[,c(12:17)], permutations = 1000)
+cap_GM <- capscale(as.matrix(bray_GM) ~ ., sample_df[,c(12:17)], na.action = na.omit)
 
 anova(cap_GM)
 RsquareAdj(cap_GM)
@@ -338,17 +450,17 @@ ggplot() +
   geom_point(data = sitemat, aes(x = CAP1, y = CAP2, color = Origin), size = 3) +
   geom_segment(data = arrowmat, aes(x = 0, y = 0, xend = CAP1*2, yend = CAP2*2), 
                arrow = arrow(length = unit(0.2,"cm")), size = 1, alpha = 0.8) + 
-  geom_text(data = arrowmat, aes(x = CAP1*2.5, y = CAP2*2.5, label = Sample), size = 5) +
+  geom_text(data = arrowmat, aes(x = CAP1*2.5, y = CAP2*2.5, label = Sample), size = 6) +
   scale_color_manual(values = c("#2ac219", "#1949c2", "#dba54d", "#e02424", 
                                 "#c124e0", "#89209e", "#a6165c", "#750f41", "#5c105e")) +
   theme_bw() +
-  theme(axis.text.y = element_text(size = 17, color = "black"),
-        axis.title.x = element_text(size = 17, color = "black"),
-        axis.title.y = element_text(size = 17, color = "black"),
-        legend.text = element_text(size = 17, color = "black"),
-        legend.title = element_text(size = 17, color = "black"),
-        axis.text.x = element_text(size = 17, color = "black")) +
-  xlab("CAP1 (8.05%)") + ylab("CAP2 (3.18%)") + xlim(-1.6,1.7)
+  theme(axis.text.y = element_text(size = 22, color = "black"),
+        axis.title.x = element_text(size = 24, color = "black"),
+        axis.title.y = element_text(size = 24, color = "black"),
+        legend.text = element_text(size = 22, color = "black"),
+        legend.title = element_text(size = 22, color = "black"),
+        axis.text.x = element_text(size = 24, color = "black")) +
+  xlab("CAP1 (7.91%)") + ylab("CAP2 (2.92%)")
 
 
 

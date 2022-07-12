@@ -8,6 +8,8 @@
 1_Reg-Farm/Outputs/Figures/*.pdf
 1_Reg-Farm/Outputs/Figures/*.svg
 1_Reg-Farm/*.RData
+1_Reg-Farm/wc0.5
+1_Reg-Farm/gadm36_ESP_1_sp.rds
 3_RNAseq/Inputs/ITS_reads
 3_RNAseq/Inputs/Databases
 3_RNAseq/Inputs/bracken.report.txt
