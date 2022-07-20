@@ -2,9 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
-1_Reg-Farm/Inputs/ITS_reads
-1_Reg-Farm/Inputs/Databases
-1_Reg-Farm/Outputs/track_t0-GM.txt
+0_ITS-GM/Inputs/ITS_reads
+0_ITS-GM/Inputs/Databases
+0_ITS-GM/Outputs/track_GM.txt
+0_ITS-GM/*.RData
 1_Reg-Farm/Outputs/Figures/*.pdf
 1_Reg-Farm/Outputs/Figures/*.svg
 1_Reg-Farm/*.RData
