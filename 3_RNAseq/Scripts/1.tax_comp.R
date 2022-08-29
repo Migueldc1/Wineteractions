@@ -92,13 +92,23 @@ asv.t_RNA.p <- melt(asv.t_RNA)
 colnames(asv.t_RNA.p) <- c("Id", "Sample_ID", "value")
 asv.t_RNA.p <- merge(asv.t_RNA.p, tax_RNA[,c(1,3)])
 
+## Contigs
+asv_cont <- read.table("Inputs/contig_tax.txt")
+colnames(asv_cont) <- gsub("\\.", "-", colnames(asv_cont))
+
+asv.t_cont.p <- melt(as.matrix(asv_cont))
+asv.t_cont.p <- cbind.data.frame(asv.t_cont.p[,1], asv.t_cont.p[,c(2,3,1)])
+colnames(asv.t_cont.p) <- c("Id", "Sample_ID", "value", "Genus")
+
+
 #
 #### TAXONOMIC EXPLORATION ####
 ## Genus
 
 asv.t_plot <- rbind.data.frame(cbind(asv.t_GM.p, Study = "GM"),
                                cbind(asv.t_SGM.p, Study = "SGM"),
-                               cbind(asv.t_RNA.p, Study = "RNA"))
+                               cbind(asv.t_RNA.p, Study = "RNA"),
+                               cbind(asv.t_cont.p, Study = "Contigs"))
 
 asv.t_plot[is.na(asv.t_plot$Genus), "Genus"] <- "Unidentified"
 
@@ -114,7 +124,7 @@ orderG <- orderG[! orderG %in% c("Other", "Unidentified")]
 orderG <- append(orderG, c("Other", "Unidentified"))
 
 asv.t_plot <- merge(asv.t_plot, sample_df, by = "Sample_ID")
-asv.t_plot$Study <- factor(asv.t_plot$Study, levels = c("GM", "SGM", "RNA"))
+asv.t_plot$Study <- factor(asv.t_plot$Study, levels = c("GM", "SGM", "RNA", "Contigs"))
 asv.t_plot$plot_ID <- paste(asv.t_plot$Farming, asv.t_plot$Condition, sep = " ")
 asv.t_plot$plot_ID <- factor(asv.t_plot$plot_ID, levels = c("CONV Control", "CONV 18C", "CONV NH4", "CONV SO2", 
                                                             "ECO Control", "ECO 18C", "ECO NH4", "ECO SO2" ))
@@ -139,6 +149,6 @@ ggplot(asv.t_plot,
         legend.text = element_text(size = 15, color = "black"),
         legend.title = element_text(size = 15, color = "black")) +
   xlab("Sample") + ylab("Abundance") +
-  guides(fill = guide_legend(nrow = 3)) + facet_wrap(~Study + Origin, nrow = 3)
+  guides(fill = guide_legend(nrow = 3)) + facet_wrap(~Study + Origin, nrow = 4)
 
 #
