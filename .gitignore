@@ -15,6 +15,7 @@
 3_RNAseq/Inputs/Databases
 3_RNAseq/Inputs/bracken.report.txt
 3_RNAseq/Inputs/SMR_log.txt
+3_RNAseq/Inputs/RNA_data
 3_RNAseq/Outputs/track_t1-GM.txt
 3_RNAseq/Outputs/track_t1-SGM.txt
 3_RNAseq/Outputs/Figures/*.pdf
