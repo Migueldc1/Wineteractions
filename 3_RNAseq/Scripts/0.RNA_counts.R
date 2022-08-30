@@ -9,17 +9,18 @@ setwd("C:/Users/Laboratorio14/OneDrive - Universidad Complutense de Madrid (UCM)
 #### LIBRARIES ####
 library(reshape2)
 
+
 #
 #### READ COUNT TABLES ####
 count.list <- list()
 i <- 0
 
-for (count in list.files("Count/eggnog/")) {
+for (count in list.files("Inputs/RNA_data/Count/")) {
   if (grepl(".summary", count, fixed = TRUE) == FALSE) {
     
     i <- i+1
     
-    table <- read.table(paste("Count/eggnog", count, sep = "/"))
+    table <- read.table(paste("Inputs/RNA_data/Count/", count, sep = "/"))
     colnames(table) <- table[1,]
     table <- table[-1,]
     colnames(table)[ncol(table)] <- gsub(".txt", "", count)
@@ -38,12 +39,11 @@ attributes <- c("em_target", "em_Preferred_name", "em_KEGG_ko", "em_BRITE", "em_
 annot.list <- list()
 i <- 0
 
-for (annot in list.files("Annotation/eggnog/")) {
+for (annot in list.files("Inputs/RNA_data/Annotation")) {
   
   i <- i+1
   
-  table <- read.table(paste("Annotation/eggnog", annot, paste(annot, ".emapper.decorated.gff", sep = ""), 
-                            sep = "/"),
+  table <- read.table(paste("Inputs/RNA_data/Annotation/", annot, sep = "/"), 
                       header = FALSE, quote = "", sep = "\t")
   
   for (atr in attributes) {
@@ -74,7 +74,7 @@ for (annot in list.files("Annotation/eggnog/")) {
   table <- unique(table[,10:15])
   
   annot.list[[i]] <- table
-  names(annot.list)[i] <- annot
+  names(annot.list)[i] <- gsub(".emapper.decorated.gff", "", annot)
   
   
 }
@@ -117,4 +117,7 @@ for (n in 1:length(ko_count.list)) {
 
 count_df <- Reduce(function(x, y) merge(x, y, all = TRUE, by = "KEGG_ko"), comparison.list)
 
-write.csv()
+#### SAVE DATA ####
+write.csv(count_df, "Outputs/count_df.csv", row.names = FALSE)
+
+#
