@@ -3,7 +3,7 @@
 # Project: Wineteractions - ITS sequence analysis of T0-GM samples
 
 # Set the project location as working directory
-setwd("C:/Users/Laboratorio14/OneDrive - Universidad Complutense de Madrid (UCM)/Wineteractions/GitHub/Wineteractions/1_Reg-Farm//")
+setwd("C:/Users/Migueldc/OneDrive - Universidad Complutense de Madrid (UCM)/Wineteractions/GitHub/Wineteractions/1_Reg-Farm//")
 
 #
 #### LIBRARIES ####
@@ -129,6 +129,34 @@ ggplot() +
         legend.title = element_text(size = 14, color = "black"))
 
 #
+#### SAMPLING MAP (Elevation) ####
+
+# Load WorldClim MAT data and crop the Spanish area
+altitude1 <- getData("worldclim", var = "alt", res = 0.5, lon = -3.703790, 
+                    lat = 40.416775)
+altitude2 <- getData("worldclim", var = "alt", res = 0.5, lon = 3.703790, 
+                    lat = 40.416775)
+altitude <- mosaic(altitude1, altitude2, fun = mean)
+altitude_crop <- crop(altitude, extent(-10, 5, 35, 44))
+
+alt_spain_df <- as.data.frame(altitude_crop, xy = TRUE, na.rm = TRUE)
+
+# Draw the map
+ggplot() +
+  geom_raster(data = alt_spain_df, aes(x = x, y = y, fill = layer)) +
+  scale_fill_distiller(name = "Altitude (m)", palette = "BrBG",
+                       guide = "none") +
+  geom_sf(data = sp.gadm, fill = NA, color = "black", size = 1/2) +
+  coord_sf(ylim = sp.lim$ylim, xlim = sp.lim$xlim) +
+  new_scale("fill") +
+  geom_point(data = sample_df, aes(x = Longitude, y = Latitude, fill = Origin), shape = 21, size = 3.5) +
+  scale_fill_manual(values = c("#2ac219", "#19b7c2", "#dba54d", "#ae0e36", 
+                               "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
+  theme_void() +
+  theme(legend.text = element_text(size = 12, color = "black"),
+        legend.title = element_text(size = 14, color = "black"))
+
+#
 #### GEOGRAPHIC DISTANCES ####
 coord_df <- sample_df[,c(2,9:8)]
 row.names(coord_df) <- coord_df[,1]
@@ -145,6 +173,57 @@ for (row in 1:nrow(coord_dist)) {
   }
   
 }
+
+#
+#### TAXONOMIC EXPLORATION ####
+asv.t_GM.p <- melt(asv.t_GM)
+colnames(asv.t_GM.p) <- c("Id", "Seq_ID", "value")
+asv.t_GM.p <- merge(asv.t_GM.p, tax_GM[,c(6,8)], by = "Id")
+
+asv.t_GM.p <- merge(asv.t_GM.p, sample_df[c(1:7)], by = "Seq_ID")
+
+## Genus
+
+asv.t_plot <- aggregate(asv.t_GM.p$value, list(asv.t_GM.p$Sample_ID, asv.t_GM.p$Genus), sum)
+colnames(asv.t_plot) <- c("Sample_ID", "Genus", "value")
+asv.t_plot$Genus[asv.t_plot$value < 0.05] <- "Other"
+
+asv.t_plot <- aggregate(asv.t_plot$value, list(asv.t_plot$Sample_ID, asv.t_plot$Genus), sum)
+colnames(asv.t_plot) <- c("Sample_ID", "Genus", "value")
+
+orderG <- levels(factor(asv.t_plot$Genus))
+orderG <- orderG[! orderG %in% c("Other", "Unidentified")]
+orderG <- append(orderG, c("Other", "Unidentified"))
+
+asv.t_plot <- merge(asv.t_plot, sample_df[,1:5], by = "Sample_ID")
+asv.t_plot$Origin <- factor(asv.t_plot$Origin, 
+                            levels = c("RdG", "VLP", "LM", "M", "R1", "R2", "R3A", "R3B", "R3C"))
+
+asv.t_plot$Sample_name <- paste(asv.t_plot$Farming, asv.t_plot$Condition, sep = "-")
+asv.t_plot$Sample_name <- factor(asv.t_plot$Sample_name, 
+                                 levels = c("CONV-Control", "CONV-18C", "CONV-NH4", "CONV-SO2",
+                                            "ECO-Control", "ECO-18C", "ECO-NH4", "ECO-SO2"))
+
+ggplot(asv.t_plot, 
+       aes(x = Sample_name, y = value, fill = factor(Genus, levels = orderG))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  scale_fill_manual(name = "Genus", values = c("#ccebc5", "#ffff33", "#e6ab02", "#80b1d3",
+                                               "#e6f5c9", "#ff7f00", "#fff2ae",
+                                               "#8da0cb", "#b15928", "#bebada", "#1b9e77",
+                                               "#fbb4ae", "#6a3d9a", "#bf5b17")) +
+  theme_minimal() + 
+  theme(legend.position = "bottom", 
+        legend.text.align = 0,
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 18, color = "black"),
+        axis.text.y = element_text(size = 18, color = "black"),
+        axis.title.x = element_text(size = 20, color = "black"),
+        strip.text.x = element_text(size = 20, color = "black"),
+        axis.title.y = element_text(size = 20, color = "black"),
+        legend.text = element_text(size = 18, color = "black"),
+        legend.title = element_text(size = 20, color = "black")) +
+  xlab("Sample") + ylab("Abundance") +
+  guides(fill = guide_legend(nrow = 3)) + facet_wrap(~Origin, nrow = 1)
+
 
 #
 #### ALPHA DIVERSITY ANALYSIS ####
@@ -275,7 +354,7 @@ ggplot(nMDS_GM.plot) +
         axis.text.x = element_text(size = 20, color = "black"))
 
 set.seed(1)
-adonis2(bray_GM ~ Farming, data = sample_df)
+adonis2(bray_GM ~ Farming*Origin, data = sample_df)
 
 sample_df$group <- paste(sample_df$Origin, sample_df$Farming)
 
@@ -332,7 +411,7 @@ ggplot(env_geo.plot) +
         axis.title.y = element_text(size = 24, color = "black"),
         axis.text.y = element_text(size = 22, color = "black")) +
   xlab("Geographic Distance") + ylab("Environmental Distance") +
-  annotate("text", label = "p = 0.715, p-value < 0.001", x = 400, y = 2, size = 7)
+  annotate("text", label = "r = 0.715, p-value < 0.001", x = 400, y = 2, size = 7)
 
 com_geo <- mantel(bray_GM, coord_dist, method = "spearman", permutations = 9999, na.rm = TRUE)
 com_geo
