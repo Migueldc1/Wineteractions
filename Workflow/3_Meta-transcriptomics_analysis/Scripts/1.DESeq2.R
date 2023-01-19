@@ -140,7 +140,8 @@ gg.pca_cond <- ggplot(pcaData_tot, aes(PC1, PC2, color = Condition)) +
         axis.text.y = element_text(size = 15, color = "black"),
         axis.text.x = element_text(size = 15, color = "black"),
         legend.title = element_text(size = 17, color = "black"),
-        legend.text = element_text(size = 15, color = "black")) +
+        legend.text = element_text(size = 15, color = "black"),
+        plot.margin = unit(c(0,0,0,0), "cm")) +
   scale_color_manual(values = col.cond) +
   labs(color = "Condition")
 
@@ -156,17 +157,19 @@ gg.pca_gen <- ggplot(pcaData_tot, aes(PC1, PC2, color = Genus)) +
         axis.text.y = element_text(size = 15, color = "black"),
         axis.text.x = element_text(size = 15, color = "black"),
         legend.title = element_text(size = 17, color = "black"),
-        legend.text = element_text(size = 15, color = "black")) +
+        legend.text = element_text(size = 15, color = "black"),
+        plot.margin = unit(c(0,0,0,0), "cm")) +
   scale_color_manual(values = col.gen) +
   labs(color = "Condition")
 
 gg.pca_gen
 
-ggsave("Workflow/3_RNAseq-meta/Outputs/Figures/total_PCA.png", 
-       plot_grid(gg.pca_cond, gg.pca_gen, align = "hv"), width = 15, height = 18, dpi = 300)
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/total_PCA.png", 
+       plot_grid(gg.pca_cond, gg.pca_gen, align = "v", labels = c("a", "b"), label_size = 20), 
+       width = 15.2, height = 5.4, dpi = 300, bg = "white")
 
 #
-
+################################################### ACABAR "DIFFERENTIAL ANALYSIS - GLOBAL" AQUÍ ####
 ## DIFFERENTIAL EXPRESSION
 # Saccharomyces v Lachancea
 res_lt.sc <- results(dds_tot, contrast = c("Genus", "Lachancea", "Saccharomyces"), alpha = 0.05)
@@ -242,11 +245,11 @@ gg.hist_gen <- ggplot(hist_gen, aes(x = abs(log2FoldChange), fill = Genus)) +
         axis.text.x = element_text(size = 18, color  = "black")) 
 
 gg.hist_gen
-#
 
-ggsave("Workflow/3_RNAseq-meta/Outputs/Figures/summary_total.png", 
+#
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/total_summary.png", 
        plot_grid(gg.venn_gen, gg.hist_gen, nrow = 1, rel_widths = c(1, 2)), 
-       width = 15, height = 10, dpi = 300, bg = "white")
+       width = 12, height = 8, dpi = 300, bg = "white")
 
 ##### PRUEBAS
 
@@ -365,6 +368,8 @@ dds_gen <- DESeqDataSetFromMatrix(countData = ko_df.gen,
                                   colData = sample_gen, 
                                   design = ~ Condition + Origin + Genus, tidy = TRUE)
 
+dds_gen$Genus <- relevel(dds_gen$Genus, "Saccharomyces")
+
 keep <- rowSums(counts(dds_gen) >= 10) >= 5
 dds_gen <- dds_gen[keep,]
 
@@ -377,21 +382,6 @@ vst_gen <- vst(dds_gen, blind = TRUE)
 pcaData_gen <- plotPCA(vst_gen, intgroup = "Condition", returnData = TRUE)
 percentVar_gen <- round(100 * attr(pcaData_gen, "percentVar"), 2)
 pcaData_gen <- merge(pcaData_gen, sample_df[,-4], by.x = "name", by.y = "Sample_ID")
-
-gg.pca_cond <- ggplot(pcaData_gen, aes(PC1, PC2, color = Condition)) +
-  geom_point(size = 4) + 
-  xlab(paste0("PC1: ", percentVar_gen[1],"% variance")) +
-  ylab(paste0("PC2: ", percentVar_gen[2],"% variance")) + 
-  theme_bw() +
-  theme(aspect.ratio = 1,
-        axis.title.y = element_text(size = 17, color = "black"),
-        axis.title.x = element_text(size = 17, color = "black"),
-        axis.text.y = element_text(size = 15, color = "black"),
-        axis.text.x = element_text(size = 15, color = "black"),
-        legend.title = element_text(size = 17, color = "black"),
-        legend.text = element_text(size = 15, color = "black")) +
-  scale_color_manual(values = col.cond) +
-  labs(color = "Condition")
 
 # Samples are separated by dominant species
 gg.pca_gen <- ggplot(pcaData_gen, aes(PC1, PC2, color = Genus)) +
@@ -406,18 +396,19 @@ gg.pca_gen <- ggplot(pcaData_gen, aes(PC1, PC2, color = Genus)) +
         axis.text.x = element_text(size = 15, color = "black"),
         legend.title = element_text(size = 17, color = "black"),
         legend.text = element_text(size = 15, color = "black")) +
-  scale_color_manual(values = col.gen) +
+  scale_color_manual(values = col.gen[c(2,4,5)]) +
   labs(color = "Condition")
 
 gg.pca_gen
 
-ggsave("Workflow/3_RNAseq-meta/Outputs/Figures/genus_PCA.png", 
-       plot_grid(gg.pca_cond, gg.pca_gen, align = "hv"), width = 15, height = 18, dpi = 300)
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/genus_PCA.png", gg.pca_gen, 
+       width = 7.6, height = 5.4, dpi = 300, bg = "white")
 
 #
 ## DIFFERENTIAL EXPRESSION
 # Saccharomyces v Lachancea
 res_lt.sc <- results(dds_gen, contrast = c("Genus", "Lachancea", "Saccharomyces"), alpha = 0.05)
+res_lt.sc <- lfcShrink(dds_gen, res = res_lt.sc, type = "ashr")
 summary(res_lt.sc)
 
 ress_lt.sc <- as.data.frame(res_lt.sc)
@@ -429,6 +420,7 @@ ress_lt.sc$DEO <- ifelse(abs(ress_lt.sc$log2FoldChange) > 1 & ress_lt.sc$padj <=
 
 # Saccharomyces v Hanseniaspora
 res_hs.sc <- results(dds_gen, contrast = c("Genus", "Hanseniaspora", "Saccharomyces"), alpha = 0.05)
+res_hs.sc <- lfcShrink(dds_gen, res = res_hs.sc, type = "ashr")
 summary(res_hs.sc)
 
 ress_hs.sc <- as.data.frame(res_hs.sc)
@@ -440,7 +432,7 @@ ress_hs.sc$DEO <- ifelse(abs(ress_hs.sc$log2FoldChange) > 1 & ress_hs.sc$padj <=
 
 ## SUMMARY
 # DE Orthologs - Venn diagram
-venn.df_gen <- merge(ress_lt.sc[,c(1, 10)], ress_hs.sc[,c(1, 10)], by = "KEGG_ko")
+venn.df_gen <- merge(ress_lt.sc[,c(1, 9)], ress_hs.sc[,c(1, 9)], by = "KEGG_ko")
 colnames(venn.df_gen) <- c("KEGG_ko", "Lt.Sc", "Hs.Sc")
 
 venn.plot_gen <- rbind.data.frame(cbind(Lt.Sc = 0, Hs.Sc = 0, 
@@ -463,7 +455,8 @@ gg.venn_gen <- ggplot() +
   geom_text(data = venn.plot_gen, aes(x = x, y = y, label = Counts), size = 7) +
   coord_fixed() + theme_void() + 
   theme(legend.position = "bottom", 
-        legend.text = element_text(size = 18, color  = "black")) +
+        legend.text = element_text(size = 15, color  = "black"),
+        plot.margin = unit(c(0,0,0,0), "cm")) +
   scale_fill_manual(values = c("#8da0cb", "#cc3939")) +
   labs(fill = NULL)
 
@@ -481,25 +474,80 @@ gg.hist_gen <- ggplot(hist_gen, aes(x = abs(log2FoldChange), fill = Genus)) +
   scale_fill_manual(values = c("#8da0cb", "#cc3939")) +
   theme(aspect.ratio = 1,
         legend.position = "none",
-        axis.text.y = element_text(size = 18, color  = "black"),
-        axis.title.x = element_text(size = 18, color  = "black"),
-        axis.title.y = element_text(size = 18, color  = "black"),
-        legend.text = element_text(size = 18, color  = "black"),
-        legend.title = element_text(size = 18, color  = "black"),
-        axis.text.x = element_text(size = 18, color  = "black")) 
+        axis.text.y = element_text(size = 15, color  = "black"),
+        axis.title.x = element_text(size = 17, color  = "black"),
+        axis.title.y = element_text(size = 17, color  = "black"),
+        legend.text = element_text(size = 15, color  = "black"),
+        legend.title = element_text(size = 17, color  = "black"),
+        axis.text.x = element_text(size = 15, color  = "black"),
+        plot.margin = unit(c(0,0,0,0), "cm"))
 
 gg.hist_gen
+
+gg.summary_gen <- plot_grid(gg.venn_gen, gg.hist_gen, nrow = 1, rel_widths = c(2, 3), labels = c("a", "b"), label_size = 20)
+
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/genus_summary.png", gg.summary_gen, 
+       width = 12, height = 7.2, dpi = 300, bg = "white")
+
 #
-
-ggsave("Workflow/3_RNAseq-meta/Outputs/Figures/summary_genal.png", 
-       plot_grid(gg.venn_gen, gg.hist_gen, nrow = 1, rel_widths = c(1, 2)), 
-       width = 15, height = 10, dpi = 300, bg = "white")
-
 ##### PRUEBAS
 
 plotCounts(dds_gen, "ko:K13076", intgroup = "Genus")
 
 #
+## BIOLOGICAL ENRICHMENT - Gene Ontology BP
+count.bias <- rowSums(ko_df.gen[,-1])
+names(count.bias) <- ko_df.gen[,1]
+
+DEG_lt.sc <- as.integer(ress_lt.sc$padj < 0.05 & abs(ress_lt.sc$log2FoldChange) >= 1)
+names(DEG_lt.sc) <- ress_lt.sc$KEGG_ko
+
+pwf_lt.sc <- nullp(DEgenes = DEG_lt.sc, bias.data = count.bias[names(DEG_lt.sc)])
+go_lt.sc <- goseq(pwf_lt.sc, gene2cat = go_df, test.cats = c("GO:BP"))
+go_lt.sc <- subset(go_lt.sc, ontology == "BP" & numDEInCat > 5)
+
+enrichGO_lt.sc <- go_lt.sc[p.adjust(go_lt.sc$over_represented_pvalue, method = "fdr") < 0.05,]
+
+DEG_hs.sc <- as.integer(ress_hs.sc$padj < 0.05 & abs(ress_hs.sc$log2FoldChange) >= 1)
+names(DEG_hs.sc) <- ress_hs.sc$KEGG_ko
+
+pwf_hs.sc <- nullp(DEgenes = DEG_hs.sc, bias.data = jitter(rep(1000, length(DEG_hs.sc))))
+go_hs.sc <- goseq(pwf_hs.sc, gene2cat = go_df)
+go_hs.sc <- subset(go_hs.sc, ontology == "BP" & numDEInCat > 5)
+
+enrichGO_hs.sc <- go_hs.sc[p.adjust(go_hs.sc$over_represented_pvalue, method = "fdr") < 0.05,]
+
+# Plot
+go_gen <- rbind.data.frame(cbind(enrichGO_lt.sc, Comparison = "Lachancea"),
+                           cbind(enrichGO_hs.sc, Comparison = "Hanseniaspora"))
+
+go_gen$Comparison <- factor(go_gen$Comparison, levels = c("Lachancea", "Hanseniaspora"))
+go_gen$comp.cat <- ifelse(duplicated(go_gen$term) | duplicated(go_gen$term, fromLast = TRUE), "Both", go_gen$Comparison)
+
+go_gen$term <- factor(go_gen$term, 
+                      levels = unique(go_gen$term[order(go_gen$comp.cat, go_gen$numDEInCat, decreasing = TRUE)]))
+
+gg.go_gen <- ggplot(go_gen) +
+  geom_bar(aes(x = term, y = numDEInCat, fill = Comparison), stat = "identity", position = "dodge") + 
+  scale_fill_manual(values = c("#8da0cb", "#cc3939")) +
+  coord_flip() +
+  theme_bw()+
+  theme(legend.position = "top",
+        aspect.ratio = 1.2,
+        axis.text.y = element_text(size = 13, color = "black"),
+        axis.title.x = element_text(size = 15, color = "black"),
+        legend.text = element_text(size = 13, color = "black"),
+        legend.title = element_text(size = 15, color = "black"),
+        axis.text.x = element_text(size = 13, color = "black")) + 
+  ylab("DE Orthologs")  + xlab("")
+
+gg.go_gen
+
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/genus_enrichGO.png", gg.go_gen, 
+       width = 10, height = 9, dpi = 300, bg = "white")
+
+#
+#### YO BORRARÍA LO DE ABAJO ####
 ## BIOLOGICAL ENRICHMENT - KEGG
 DEO_lt.sc <- gsub("ko:", "", subset(ress_lt.sc, DEO == 1)$KEGG_ko)
 enrichKEGG_lt.sc <- enrichKEGG(DEO_lt.sc, organism = "ko", keyType = "kegg")
@@ -557,64 +605,22 @@ pathview(gene.data = logFC,
          species = "ko",  
          gene.idtype = "kegg")
 
-## BIOLOGICAL ENRICHMENT - Gene Ontology BP
-count.bias <- rowSums(ko_df.gen[,-1])
-names(count.bias) <- ko_df.gen[,1]
-
-DEG_lt.sc <- as.integer(ress_lt.sc$padj < 0.05 & abs(ress_lt.sc$log2FoldChange) >= 1)
-names(DEG_lt.sc) <- ress_lt.sc$KEGG_ko
-
-pwf_lt.sc <- nullp(DEgenes = DEG_lt.sc, bias.data = count.bias[names(DEG_lt.sc)])
-go_lt.sc <- goseq(pwf_lt.sc, gene2cat = go_df, test.cats = c("GO:BP"))
-go_lt.sc <- subset(go_lt.sc, ontology == "BP" & numDEInCat > 2 & numInCat >= 5)
-
-enrichGO_lt.sc <- go_lt.sc[p.adjust(go_lt.sc$over_represented_pvalue, method = "fdr") < 0.05,]
-
-
-DEG_hs.sc <- as.integer(ress_hs.sc$padj < 0.05 & abs(ress_hs.sc$log2FoldChange) >= 1)
-names(DEG_hs.sc) <- ress_hs.sc$KEGG_ko
-
-count.bias[names(DEG_hs.sc)]
-pwf_hs.sc <- nullp(DEgenes = DEG_hs.sc, bias.data = jitter(rep(1000, length(DEG_hs.sc))))
-go_hs.sc <- goseq(pwf_hs.sc, gene2cat = go_df)
-go_hs.sc <- subset(go_hs.sc, ontology == "BP" & numDEInCat > 2 & numInCat >= 5)
-
-enrichGO_hs.sc <- go_hs.sc[p.adjust(go_hs.sc$over_represented_pvalue, method = "fdr") < 0.05,]
-
-# Plot
-go_gen <- rbind.data.frame(cbind(enrichGO_lt.sc, Comparison = "Lachancea"),
-                           cbind(enrichGO_hs.sc, Comparison = "Hanseniaspora"))
-
-go_gen$Comparison <- factor(go_gen$Comparison, levels = c("Lachancea", "Hanseniaspora"))
-
-ggplot(go_gen) +
-  geom_bar(aes(x = term, y = numDEInCat, fill = Comparison), stat = "identity", position = "dodge") + 
-  scale_fill_manual(values = c("#8da0cb", "#cc3939")) +
-  coord_flip() +
-  theme_bw()+
-  theme(axis.text.y = element_text(size = 12, color = "black"),
-        axis.title.x = element_text(size = 15, color = "black"),
-        legend.text = element_text(size = 15, color = "black"),
-        legend.title = element_text(size = 15, color = "black"),
-        axis.text.x = element_text(size = 15, color = "black")) + 
-  ylab("Gene count")  + xlab("")
-
 #
 #### DIFFERENTIAL ANALYSIS - SACCHAROMYCES ####
 sample_sc <- sample_df[sample_df$Genus == "Saccharomyces",]
-sample_sc <- sample_sc[-5,]
+sample_sc <- sample_sc[-c(5,6),]
 
 ko_sc <- ko_df.f[,c("KEGG_ko", sample_sc$Sample_ID)]
 
 dds_sc <- DESeqDataSetFromMatrix(countData = ko_sc, 
                                  colData = sample_sc, 
-                                 design = ~ Condition + Origin + Farming, tidy = TRUE)
+                                 design = ~ Condition + Origin, tidy = TRUE)
 
 keep <- rowSums(counts(dds_sc)) >= 10
 dds_sc <- dds_sc[keep,]
 
 dds_sc <- DESeq(dds_sc, fitType = "local")
-resultsNames(dds_tot)
+resultsNames(dds_sc)
 
 ## PCA
 vst_sc <- vst(dds_sc, blind = TRUE)
@@ -639,11 +645,184 @@ gg.pca_sacc <- ggplot(pcaData_sc, aes(PC1, PC2, color = Condition)) +
   labs(color = "Condition")
 
 gg.pca_sacc
-ggsave("Workflow/3_RNAseq-meta/Outputs/Figures/sacc_PCA.png", 
+
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/sacc_PCA.png", 
        gg.pca_sacc, width = 7.5, height = 6, dpi = 300)
 
+#
+## DIFFERENTIAL EXPRESSION
+
+# Low Temperature
+res_sc.18C <- results(dds_sc, contrast = c("Condition", "18C", "Control"), alpha = 0.05)
+res_sc.18C <- lfcShrink(dds_sc, res = res_sc.18C, contrast = c("Condition", "18C", "Control"), type = "normal")
+summary(res_sc.18C)
+
+ress_sc.18C <- as.data.frame(res_sc.18C)
+ress_sc.18C$KEGG_ko <- row.names(ress_sc.18C)
+
+ress_sc.18C <- merge(ress_sc.18C, kegg_df, by = "KEGG_ko", all.x = TRUE)
+ress_sc.18C <- ress_sc.18C[order(ress_sc.18C$padj),]
+ress_sc.18C$DEO <- ifelse(abs(ress_sc.18C$log2FoldChange) > 1 & ress_sc.18C$padj <= 0.05, 1, 0)
+
+# High Ammonia
+res_sc.NH4 <- results(dds_sc, contrast = c("Condition", "NH4", "Control"), alpha = 0.05)
+res_sc.NH4 <- lfcShrink(dds_sc, res = res_sc.NH4, contrast = c("Condition", "NH4", "Control"), type = "normal")
+summary(res_sc.NH4)
+
+ress_sc.NH4 <- as.data.frame(res_sc.NH4)
+ress_sc.NH4$KEGG_ko <- row.names(ress_sc.NH4)
+
+ress_sc.NH4 <- merge(ress_sc.NH4, kegg_df, by = "KEGG_ko", all.x = TRUE)
+ress_sc.NH4 <- ress_sc.NH4[order(ress_sc.NH4$padj),]
+ress_sc.NH4$DEO <- ifelse(abs(ress_sc.NH4$log2FoldChange) > 1 & ress_sc.NH4$padj <= 0.05, 1, 0)
+
+# High Sulfites
+res_sc.SO2 <- results(dds_sc, contrast = c("Condition", "SO2", "Control"), alpha = 0.05)
+res_sc.SO2 <- lfcShrink(dds_sc, res = res_sc.SO2, contrast = c("Condition", "SO2", "Control"), type = "normal")
+summary(res_sc.SO2)
+
+ress_sc.SO2 <- as.data.frame(res_sc.SO2)
+ress_sc.SO2$KEGG_ko <- row.names(ress_sc.SO2)
+
+ress_sc.SO2 <- merge(ress_sc.SO2, kegg_df, by = "KEGG_ko", all.x = TRUE)
+ress_sc.SO2 <- ress_sc.SO2[order(ress_sc.SO2$padj),]
+ress_sc.SO2$DEO <- ifelse(abs(ress_sc.SO2$log2FoldChange) > 1 & ress_sc.SO2$padj <= 0.05, 1, 0)
+
+## SUMMARY
+# DE Orthologs - Venn diagram
+venn.df_sacc <- Reduce(function(x, y) merge(x, y, all = TRUE, by = "KEGG_ko"), 
+                       list(ress_sc.18C[,c(1,10)], ress_sc.NH4[,c(1,10)], ress_sc.SO2[,c(1,10)]))
+colnames(venn.df_sacc) <- c("KEGG_ko", "Sc.18C", "Sc.NH4", "Sc.SO2")
+venn.df_sacc[is.na(venn.df_sacc)] <- 0
+
+venn.plot_sacc <- rbind.data.frame(cbind(Sc.18C = 0, Sc.NH4 = 0, Sc.SO2 = 0,
+                                         Counts = sum(rowSums(venn.df_sacc[,-1]) == 0)),
+                                   cbind(Sc.18C = 1, Sc.NH4 = 0, Sc.SO2 = 0,
+                                         Counts = sum(venn.df_sacc[,2] == 1 & rowSums(venn.df_sacc[,-1]) == 1)),
+                                   cbind(Sc.18C = 0, Sc.NH4 = 1, Sc.SO2 = 0,
+                                         Counts = sum(venn.df_sacc[,3] == 1 & rowSums(venn.df_sacc[,-1]) == 1)),
+                                   cbind(Sc.18C = 0, Sc.NH4 = 0, Sc.SO2 = 1,
+                                         Counts = sum(venn.df_sacc[,4] == 1 & rowSums(venn.df_sacc[,-1]) == 1)),
+                                   cbind(Sc.18C = 1, Sc.NH4 = 1, Sc.SO2 = 0,
+                                         Counts = sum(venn.df_sacc[,4] == 0 & rowSums(venn.df_sacc[,-1]) == 2)),
+                                   cbind(Sc.18C = 1, Sc.NH4 = 0, Sc.SO2 = 1,
+                                         Counts = sum(venn.df_sacc[,3] == 0 & rowSums(venn.df_sacc[,-1]) == 2)),
+                                   cbind(Sc.18C = 0, Sc.NH4 = 1, Sc.SO2 = 1,
+                                         Counts = sum(venn.df_sacc[,2] == 0 & rowSums(venn.df_sacc[,-1]) == 2)),
+                                   cbind(Sc.18C = 1, Sc.NH4 = 1, Sc.SO2 = 1,
+                                         Counts = sum(rowSums(venn.df_sacc[,-1]) == 3)))
+
+venn.plot_sacc <- cbind.data.frame(venn.plot_sacc, 
+                                   x = c(2.1, 0, -1.5, 1.5, -0.85, 0.85, 0, 0), 
+                                   y = c(-2, 1.5, -0.5, -0.5, 0.5, 0.5, -1, 0))
+
+venn.out3 <- data.frame(x = c(0, -0.75, 0.75), y = c(1, -0.5, -0.5), labels = c("18C", "NH4", "SO2"))
+venn.out3$labels <- factor(venn.out3$labels, levels = c("18C", "NH4", "SO2"))
+
+gg.venn_sc <- ggplot() +
+  geom_circle(data = venn.out3, aes(x0 = x, y0 = y, r = 1.5, fill = labels), 
+              alpha = 0.85, linewidth = 1, colour = "gray30") + 
+  geom_text(data = venn.plot_sacc, aes(x = x, y = y, label = Counts), size = 7) +
+  coord_fixed() + theme_void() + 
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 18, color  = "black")) +
+  scale_fill_manual(values = col.cond[-1]) +
+  labs(fill = NULL)
+
+gg.venn_sc
+
+# Accumulated LFC - Histogram
+hist_cond <- rbind(cbind(subset(ress_sc.18C, DEO == 1), Condition = "18C"),
+                   cbind(subset(ress_sc.NH4, DEO == 1), Condition = "NH4"),
+                   cbind(subset(ress_sc.SO2, DEO == 1), Condition = "SO2"))
+
+gg.hist_sc <- ggplot(hist_cond, aes(x = abs(log2FoldChange), fill = Condition)) + 
+  geom_histogram(binwidth = 1, position = "dodge", alpha = 0.75, color = "gray30") +
+  theme_bw() + xlab("Absolute log2 Fold Change") + ylab("Number of DE Orthologs") +
+  scale_fill_manual(values = col.cond[-1]) +
+  theme(axis.text.y = element_text(size = 18, color  = "black"),
+        axis.title.x = element_text(size = 18, color  = "black"),
+        axis.title.y = element_text(size = 18, color  = "black"),
+        legend.text = element_text(size = 18, color  = "black"),
+        legend.title = element_text(size = 18, color  = "black"),
+        axis.text.x = element_text(size = 18, color  = "black")) 
+
+gg.hist_sc
+
+gg.summary_sc <- plot_grid(gg.venn_sc, gg.hist_sc, nrow = 1, rel_widths = c(2, 3), labels = c("a", "b"), label_size = 20)
+gg.summary_sc
+
+#
+##### PRUEBAS
+
+plotCounts(dds_sc, "ko:K06641", intgroup = "Condition")
+
+## BIOLOGICAL ENRICHMENT - Gene Ontology BP
+count.bias <- rowSums(ko_sc[,-1])
+names(count.bias) <- ko_sc[,1]
+
+DEG_sc.18C <- as.integer(ress_sc.18C$padj < 0.05 & abs(ress_sc.18C$log2FoldChange) >= 1)
+names(DEG_sc.18C) <- ress_sc.18C$KEGG_ko
+
+pwf_sc.18C <- nullp(DEgenes = DEG_sc.18C, bias.data = count.bias[names(DEG_sc.18C)])
+go_sc.18C <- goseq(pwf_sc.18C, gene2cat = go_df, test.cats = c("GO:BP"))
+go_sc.18C <- subset(go_sc.18C, ontology == "BP" & numDEInCat > 0)
+
+enrichGO_sc.18C <- go_sc.18C[p.adjust(go_sc.18C$over_represented_pvalue, method = "fdr") < 0.05,]
+
+DEG_sc.NH4 <- as.integer(ress_sc.NH4$padj < 0.05 & abs(ress_sc.NH4$log2FoldChange) >= 1)
+names(DEG_sc.NH4) <- ress_sc.NH4$KEGG_ko
+
+pwf_sc.NH4 <- nullp(DEgenes = DEG_sc.NH4, bias.data = count.bias[names(DEG_sc.NH4)])
+go_sc.NH4 <- goseq(pwf_sc.NH4, gene2cat = go_df)
+go_sc.NH4 <- subset(go_sc.NH4, ontology == "BP" & numDEInCat > 0)
+
+enrichGO_sc.NH4 <- go_sc.NH4[p.adjust(go_sc.NH4$over_represented_pvalue, method = "fdr") < 0.05,]
+
+DEG_sc.SO2 <- as.integer(ress_sc.SO2$padj < 0.05 & abs(ress_sc.SO2$log2FoldChange) >= 1)
+names(DEG_sc.SO2) <- ress_sc.SO2$KEGG_ko
+DEG_sc.SO2[is.na(DEG_sc.SO2)] <- 0
+
+pwf_sc.SO2 <- nullp(DEgenes = DEG_sc.SO2, bias.data = jitter(rep(1000, length(DEG_sc.SO2))))
+go_sc.SO2 <- goseq(pwf_sc.SO2, gene2cat = go_df)
+go_sc.SO2 <- subset(go_sc.SO2, ontology == "BP" & numDEInCat > 0)
+
+enrichGO_sc.SO2 <- go_sc.SO2[p.adjust(go_sc.SO2$over_represented_pvalue, method = "fdr") < 0.05,]
+
+# Plot
+go_sc <- rbind.data.frame(cbind(enrichGO_sc.18C, Comparison = "18C"),
+                          cbind(enrichGO_sc.NH4, Comparison = "NH4"))
+
+go_sc$comp.cat <- ifelse(duplicated(go_sc$term) | duplicated(go_sc$term, fromLast = TRUE), "Both", go_sc$Comparison)
+
+go_sc$term <- factor(go_sc$term, levels = unique(go_sc$term[order(go_sc$comp.cat, go_sc$numDEInCat, decreasing = TRUE)]))
+
+gg.go_sc <- ggplot(go_sc) +
+  geom_bar(aes(x = term, y = numDEInCat, fill = Comparison), stat = "identity", position = "dodge") + 
+  scale_fill_manual(values = c("#1e74eb", "#ebb249")) +
+  coord_flip() +
+  theme_bw()+
+  theme(aspect.ratio = 0.62,
+        legend.position = "bottom",
+        axis.text.y = element_text(size = 13, color = "black"),
+        axis.title.x = element_text(size = 15, color = "black"),
+        legend.text = element_text(size = 13, color = "black"),
+        legend.title = element_text(size = 15, color = "black"),
+        axis.text.x = element_text(size = 13, color = "black")) + 
+  ylab("DE Orthologs")  + xlab("")
+
+gg.go_sc
+
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/sc_summary.png", 
+       plot_grid(gg.summary_sc, gg.go_sc, nrow = 2, labels = c("", "c"), label_size = 20, 
+                 rel_widths = c(1,2)), 
+       width = 12, height = 12, dpi = 300, bg = "white")
+
+
+#### LO QUE ESTABA ####
 ## DIFFERENTIAL EXPRESSION
 # Low Temperature
+
 ko_sc.18C <- ko_sc[,c("KEGG_ko", sample_sc[sample_sc$Condition %in% c("Control", "18C"), 1])]
 sample_sc.18C <- sample_sc[sample_sc$Condition %in% c("Control", "18C"), ]
 

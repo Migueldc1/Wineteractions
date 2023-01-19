@@ -11,8 +11,4 @@ Workflow/1_Reg-Farm/Outputs/Figures/*.pdf
 Workflow/1_Reg-Farm/Outputs/Figures/*.svg
 Workflow/1_Reg-Farm/Outputs/RData
 Workflow/2_Exp-Cond/Outputs/RData
-Workflow/3_RNAseq/Outputs/track_t1-GM.txt
-Workflow/3_RNAseq/Outputs/track_t1-SGM.txt
-Workflow/3_RNAseq/Outputs/Figures/*.pdf
-Workflow/3_RNAseq/Outputs/Figures/*.svg
 Workflow/3_RNAseq/Outputs/RData
