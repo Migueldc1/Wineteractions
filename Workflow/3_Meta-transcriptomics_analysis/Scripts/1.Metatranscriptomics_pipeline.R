@@ -16,8 +16,8 @@ rm(list = ls())
 setwd("~/../OneDrive - Universidad Complutense de Madrid (UCM)/Wineteractions/GitHub/Wineteractions")
 
 # Load Environment
-#load("Workflow/3_RNAseq-meta/Outputs/RData/RNAseq-meta.RData")
-#save.image("Workflow/3_RNAseq-meta/Outputs/RData/RNAseq-meta.RData")
+#load("Workflow/3_Meta-transcriptomics_analysis/Outputs/RData/RNAseq-meta.RData")
+#save.image("Workflow/3_Meta-transcriptomics_analysis/Outputs/RData/RNAseq-meta.RData")
 
 #
 #### CUSTOM FUNCTION ####
@@ -105,6 +105,8 @@ sample_df <- read.table("Data/Metadata/sample_SGM.txt", sep = "\t", header = TRU
 sample_df$Condition <- factor(sample_df$Condition, levels = c("Control", "18C", "NH4", "SO2"))
 sample_df$Genus <- factor(sample_df$Genus, levels = c("Citeromyces", "Hanseniaspora", "Kluyveromyces", "Lachancea", 
                                                       "Saccharomyces", "Other"))
+
+sample_df$Specie <- gsub("Hanseniaspora ", "H.", sample_df$Specie)
 
 ## COLORS
 col.cond <- c("#bf2c45", "#1e74eb", "#ebb249", "#93bf2c")
@@ -607,168 +609,56 @@ gg.pca_lt <- ggplot(pcaData_lt, aes(PC1, PC2, color = Condition)) +
   scale_color_manual(values = col.cond) +
   labs(color = "Condition")
 
-gg.pca_lt
+gg.pca.or_lt <- ggplot(pcaData_lt, aes(PC1, PC2, color = Origin)) +
+  geom_point(size = 4) + 
+  xlab(paste0("PC1: ", percentVar_lt[1],"% variance")) +
+  ylab(paste0("PC2: ", percentVar_lt[2],"% variance")) + 
+  theme_bw() +
+  theme(aspect.ratio = 1, 
+        axis.title.y = element_text(size = 17, color = "black"),
+        axis.title.x = element_text(size = 17, color = "black"),
+        axis.text.y = element_text(size = 15, color = "black"),
+        axis.text.x = element_text(size = 15, color = "black"),
+        legend.title = element_text(size = 17, color = "black"),
+        legend.text = element_text(size = 15, color = "black")) +
+  scale_color_manual(values = c("#dba54d", "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
+  labs(color = "Origin")
 
-ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/lt_PCA.png", 
-       gg.pca_lt, width = 7.5, height = 6, dpi = 300)
+gg.pca.fm_lt <- ggplot(pcaData_lt, aes(PC1, PC2, color = Farming)) +
+  geom_point(size = 4) + 
+  xlab(paste0("PC1: ", percentVar_lt[1],"% variance")) +
+  ylab(paste0("PC2: ", percentVar_lt[2],"% variance")) + 
+  theme_bw() +
+  theme(aspect.ratio = 1, 
+        axis.title.y = element_text(size = 17, color = "black"),
+        axis.title.x = element_text(size = 17, color = "black"),
+        axis.text.y = element_text(size = 15, color = "black"),
+        axis.text.x = element_text(size = 15, color = "black"),
+        legend.title = element_text(size = 17, color = "black"),
+        legend.text = element_text(size = 15, color = "black")) +
+  scale_color_manual(values = c("#b59348", "#3dc43b")) +
+  labs(color = "Farming")
 
-#
-## DIFFERENTIAL EXPRESSION
 
-# Low Temperature
-res_lt.18C <- results(dds_lt, contrast = c("Condition", "18C", "Control"), alpha = 0.05)
-res_lt.18C <- lfcShrink(dds_lt, res = res_lt.18C, contrast = c("Condition", "18C", "Control"), type = "normal")
-summary(res_lt.18C)
-
-ress_lt.18C <- as.data.frame(res_lt.18C)
-ress_lt.18C$KEGG_ko <- row.names(ress_lt.18C)
-
-ress_lt.18C <- merge(ress_lt.18C, kegg_df, by = "KEGG_ko", all.x = TRUE)
-ress_lt.18C <- ress_lt.18C[order(ress_lt.18C$padj),]
-ress_lt.18C$DEO <- ifelse(abs(ress_lt.18C$log2FoldChange) > 1 & ress_lt.18C$padj <= 0.05, 1, 0)
-
-# High Ammonia
-res_lt.NH4 <- results(dds_lt, contrast = c("Condition", "NH4", "Control"), alpha = 0.05)
-res_lt.NH4 <- lfcShrink(dds_lt, res = res_lt.NH4, contrast = c("Condition", "NH4", "Control"), type = "normal")
-summary(res_lt.NH4)
-
-ress_lt.NH4 <- as.data.frame(res_lt.NH4)
-ress_lt.NH4$KEGG_ko <- row.names(ress_lt.NH4)
-
-ress_lt.NH4 <- merge(ress_lt.NH4, kegg_df, by = "KEGG_ko", all.x = TRUE)
-ress_lt.NH4 <- ress_lt.NH4[order(ress_lt.NH4$padj),]
-ress_lt.NH4$DEO <- ifelse(abs(ress_lt.NH4$log2FoldChange) > 1 & ress_lt.NH4$padj <= 0.05, 1, 0)
-
-## SUMMARY
-# DE Orthologs - Venn diagram
-venn.df_lt <- Reduce(function(x, y) merge(x, y, all = TRUE, by = "KEGG_ko"), 
-                     list(ress_lt.18C[,c(1,10)], ress_lt.NH4[,c(1,10)]))
-colnames(venn.df_lt) <- c("KEGG_ko", "Lt.18C", "Lt.NH4")
-venn.df_lt[is.na(venn.df_lt)] <- 0
-
-venn.plot_lt <- rbind.data.frame(cbind(Lt.18C = 0, Lt.NH4 = 0, Counts = sum(rowSums(venn.df_lt[,-1]) == 0)),
-                                 cbind(Lt.18C = 1, Lt.NH4 = 0,
-                                       Counts = sum(venn.df_lt[,2] == 1 & rowSums(venn.df_lt[,-1]) == 1)),
-                                 cbind(Lt.18C = 0, Lt.NH4 = 1,
-                                       Counts = sum(venn.df_lt[,3] == 1 & rowSums(venn.df_lt[,-1]) == 1)),
-                                 cbind(Lt.18C = 1, Lt.NH4 = 1, Counts = sum(rowSums(venn.df_lt[,-1]) == 2)))
-
-venn.plot_lt <- cbind.data.frame(venn.plot_lt, 
-                                   x = c(2.1, 0, -1.5, 1.5, -0.85, 0.85, 0, 0), 
-                                   y = c(-2, 1.5, -0.5, -0.5, 0.5, 0.5, -1, 0))
-
-venn.out3 <- data.frame(x = c(0, -0.75, 0.75), y = c(1, -0.5, -0.5), labels = c("18C", "NH4", "SO2"))
-venn.out3$labels <- factor(venn.out3$labels, levels = c("18C", "NH4", "SO2"))
-
-gg.venn_lt <- ggplot() +
-  geom_circle(data = venn.out3, aes(x0 = x, y0 = y, r = 1.5, fill = labels), 
-              alpha = 0.85, linewidth = 1, colour = "gray30") + 
-  geom_text(data = venn.plot_lt, aes(x = x, y = y, label = Counts), size = 7) +
-  coord_fixed() + theme_void() + 
-  theme(legend.position = "bottom", 
-        legend.text = element_text(size = 18, color  = "black")) +
-  scale_fill_manual(values = col.cond[-1]) +
-  labs(fill = NULL)
-
-gg.venn_lt
-
-# Accumulated LFC - Histogram
-hist_cond <- rbind(cbind(subset(ress_lt.18C, DEO == 1), Condition = "18C"),
-                   cbind(subset(ress_lt.NH4, DEO == 1), Condition = "NH4"),
-                   cbind(subset(ress_lt.SO2, DEO == 1), Condition = "SO2"))
-
-gg.hist_lt <- ggplot(hist_cond, aes(x = abs(log2FoldChange), fill = Condition)) + 
-  geom_histogram(binwidth = 1, position = "dodge", alpha = 0.75, color = "gray30") +
-  theme_bw() + xlab("Absolute log2 Fold Change") + ylab("Number of DE Orthologs") +
-  scale_fill_manual(values = col.cond[-1]) +
-  theme(axis.text.y = element_text(size = 18, color  = "black"),
-        axis.title.x = element_text(size = 18, color  = "black"),
-        axis.title.y = element_text(size = 18, color  = "black"),
-        legend.text = element_text(size = 18, color  = "black"),
-        legend.title = element_text(size = 18, color  = "black"),
-        axis.text.x = element_text(size = 18, color  = "black")) 
-
-gg.hist_lt
-
-gg.summary_lt <- plot_grid(gg.venn_lt, gg.hist_lt, nrow = 1, rel_widths = c(2, 3), labels = c("a", "b"), label_size = 20)
-gg.summary_lt
-
-#
-##### PRUEBAS
-
-plotCounts(dds_lt, "ko:K06641", intgroup = "Condition")
-
-## BIOLOGICAL ENRICHMENT - Gene Ontology BP
-count.bias <- rowSums(ko_lt[,-1])
-names(count.bias) <- ko_lt[,1]
-
-DEG_lt.18C <- as.integer(ress_lt.18C$padj < 0.05 & abs(ress_lt.18C$log2FoldChange) >= 1)
-names(DEG_lt.18C) <- ress_lt.18C$KEGG_ko
-
-pwf_lt.18C <- nullp(DEgenes = DEG_lt.18C, bias.data = count.bias[names(DEG_lt.18C)])
-go_lt.18C <- goseq(pwf_lt.18C, gene2cat = go_df, test.cats = c("GO:BP"))
-go_lt.18C <- subset(go_lt.18C, ontology == "BP" & numDEInCat > 0)
-
-enrichGO_lt.18C <- go_lt.18C[p.adjust(go_lt.18C$over_represented_pvalue, method = "fdr") < 0.05,]
-
-DEG_lt.NH4 <- as.integer(ress_lt.NH4$padj < 0.05 & abs(ress_lt.NH4$log2FoldChange) >= 1)
-names(DEG_lt.NH4) <- ress_lt.NH4$KEGG_ko
-
-pwf_lt.NH4 <- nullp(DEgenes = DEG_lt.NH4, bias.data = count.bias[names(DEG_lt.NH4)])
-go_lt.NH4 <- goseq(pwf_lt.NH4, gene2cat = go_df)
-go_lt.NH4 <- subset(go_lt.NH4, ontology == "BP" & numDEInCat > 0)
-
-enrichGO_lt.NH4 <- go_lt.NH4[p.adjust(go_lt.NH4$over_represented_pvalue, method = "fdr") < 0.05,]
-
-DEG_lt.SO2 <- as.integer(ress_lt.SO2$padj < 0.05 & abs(ress_lt.SO2$log2FoldChange) >= 1)
-names(DEG_lt.SO2) <- ress_lt.SO2$KEGG_ko
-DEG_lt.SO2[is.na(DEG_lt.SO2)] <- 0
-
-pwf_lt.SO2 <- nullp(DEgenes = DEG_lt.SO2, bias.data = jitter(rep(1000, length(DEG_lt.SO2))))
-go_lt.SO2 <- goseq(pwf_lt.SO2, gene2cat = go_df)
-go_lt.SO2 <- subset(go_lt.SO2, ontology == "BP" & numDEInCat > 0)
-
-enrichGO_lt.SO2 <- go_lt.SO2[p.adjust(go_lt.SO2$over_represented_pvalue, method = "fdr") < 0.05,]
-
-# Plot
-go_lt <- rbind.data.frame(cbind(enrichGO_lt.18C, Comparison = "18C"),
-                          cbind(enrichGO_lt.NH4, Comparison = "NH4"))
-
-go_lt$comp.cat <- ifelse(duplicated(go_lt$term) | duplicated(go_lt$term, fromLast = TRUE), "Both", go_lt$Comparison)
-
-go_lt$term <- factor(go_lt$term, levels = unique(go_lt$term[order(go_lt$comp.cat, go_lt$numDEInCat, decreasing = TRUE)]))
-
-gg.go_lt <- ggplot(go_lt) +
-  geom_bar(aes(x = term, y = numDEInCat, fill = Comparison), stat = "identity", position = "dodge") + 
-  scale_fill_manual(values = c("#1e74eb", "#ebb249")) +
-  coord_flip() +
-  theme_bw()+
-  theme(aspect.ratio = 0.62,
-        legend.position = "bottom",
-        axis.text.y = element_text(size = 13, color = "black"),
-        axis.title.x = element_text(size = 15, color = "black"),
-        legend.text = element_text(size = 13, color = "black"),
-        legend.title = element_text(size = 15, color = "black"),
-        axis.text.x = element_text(size = 13, color = "black")) + 
-  ylab("DE Orthologs")  + xlab("")
-
-gg.go_lt
-
-ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/sc_summary.png", 
-       plot_grid(gg.summary_lt, gg.go_lt, nrow = 2, labels = c("", "c"), label_size = 20, 
-                 rel_widths = c(1,2)), 
-       width = 12, height = 12, dpi = 300, bg = "white")
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/lt_PCA.png", bg = "white",
+       plot_grid(gg.pca_lt, gg.pca.or_lt, gg.pca.fm_lt, nrow = 1, labels = c("a","b","c"), label_size = 20, align = "hv"),
+       width = 20, height = 6, dpi = 300)
 
 #
 #### DIFFERENTIAL ANALYSIS - HANSENIASPORA ####
-ko_hs <- ko_df[,c("KEGG_ko", sample_df[sample_df$Genus == "Hanseniaspora", 1])]
 sample_hs <- sample_df[sample_df$Genus == "Hanseniaspora",]
+sample_hs <- sample_hs[-10,]
+
+ko_hs <- ko_df.f[,c("KEGG_ko", sample_hs$Sample_ID)]
 
 dds_hs <- DESeqDataSetFromMatrix(countData = ko_hs, 
                                  colData = sample_hs, 
-                                 design = ~ Condition + Origin + Condition:Origin, tidy = TRUE)
+                                 design = ~ Condition + Specie, tidy = TRUE)
 
-dds_hs <- DESeq(dds_hs)
+keep <- rowSums(counts(dds_hs)) >= 10
+dds_hs <- dds_hs[keep,]
+
+dds_hs <- DESeq(dds_hs, fitType = "local")
 resultsNames(dds_hs)
 
 ## PCA
@@ -778,12 +668,13 @@ pcaData_hs <- plotPCA(vst_hs, intgroup = "Condition", returnData = TRUE)
 percentVar_hs <- round(100 * attr(pcaData_hs, "percentVar"), 2)
 pcaData_hs <- merge(pcaData_hs, sample_hs[,-4], by.x = "name", by.y = "Sample_ID")
 
-ggplot(pcaData_hs, aes(PC1, PC2, color = Condition)) +
+gg.pca_hs <- ggplot(pcaData_hs, aes(PC1, PC2, color = Condition)) +
   geom_point(size = 4) + 
   xlab(paste0("PC1: ", percentVar_hs[1],"% variance")) +
   ylab(paste0("PC2: ", percentVar_hs[2],"% variance")) + 
   theme_bw() +
-  theme(axis.title.y = element_text(size = 17, color = "black"),
+  theme(aspect.ratio = 1, 
+        axis.title.y = element_text(size = 17, color = "black"),
         axis.title.x = element_text(size = 17, color = "black"),
         axis.text.y = element_text(size = 15, color = "black"),
         axis.text.x = element_text(size = 15, color = "black"),
@@ -792,87 +683,27 @@ ggplot(pcaData_hs, aes(PC1, PC2, color = Condition)) +
   scale_color_manual(values = col.cond) +
   labs(color = "Condition")
 
+gg.pca_hs
 
-## DIFFERENTIAL EXPRESSION
-# Low Temperature
-res_hs.18C <- lfcShrink(dds_hs, coef = 2, type = "ashr")
-summary(res_hs.18C)
+## Hanseniaspora Species
+gg.pca.sp_hs <- ggplot(pcaData_hs, aes(PC1, PC2, color = Specie)) +
+  geom_point(size = 4) + 
+  xlab(paste0("PC1: ", percentVar_hs[1],"% variance")) +
+  ylab(paste0("PC2: ", percentVar_hs[2],"% variance")) + 
+  theme_bw() +
+  theme(aspect.ratio = 1, 
+        axis.title.y = element_text(size = 17, color = "black"),
+        axis.title.x = element_text(size = 17, color = "black"),
+        axis.text.y = element_text(size = 15, color = "black"),
+        axis.text.x = element_text(size = 15, color = "black"),
+        legend.title = element_text(size = 17, color = "black"),
+        legend.text = element_text(size = 15, color = "black", face = "italic")) +
+  scale_color_manual(values = c("#911039", "#32875a", "#249db5")) +
+  labs(color = "Specie")
 
-ress_hs.18C <- as.data.frame(res_hs.18C)
-ress_hs.18C$KEGG_ko <- row.names(ress_hs.18C)
-
-ress_hs.18C <- merge(ress_hs.18C, kegg_df, by = "KEGG_ko", all.x = TRUE)
-ress_hs.18C <- ress_hs.18C[order(ress_hs.18C$padj),]
-ress_hs.18C$DEO <- ifelse(abs(ress_hs.18C$log2FoldChange) > 1 & ress_hs.18C$padj <= 0.05, 1, 0)
-
-# High Ammonia
-res_hs.NH4 <- lfcShrink(dds_hs, coef = 3, type = "ashr")
-summary(res_hs.NH4)
-
-ress_hs.NH4 <- as.data.frame(res_hs.NH4)
-ress_hs.NH4$KEGG_ko <- row.names(ress_hs.NH4)
-
-ress_hs.NH4 <- merge(ress_hs.NH4, kegg_df, by = "KEGG_ko", all.x = TRUE)
-ress_hs.NH4 <- ress_hs.NH4[order(ress_hs.NH4$padj),]
-ress_hs.NH4$DEO <- ifelse(abs(ress_hs.NH4$log2FoldChange) > 1 & ress_hs.NH4$padj <= 0.05, 1, 0)
-
-## SUMMARY
-# DE Orthologs - Venn diagram
-venn.df_hs <- merge(ress_hs.18C[,c(1, 9)], ress_hs.NH4[,c(1, 9)], by = "KEGG_ko")
-colnames(venn.df_hs) <- c("KEGG_ko", "18C", "NH4")
-
-venn.plot_hs <- rbind.data.frame(cbind(`18C` = 0, NH4 = 0, 
-                                       Counts = sum(rowSums(venn.df_hs[,-1]) == 0)),
-                                 cbind(`18C` = 0, NH4 = 1, 
-                                       Counts = sum(venn.df_hs[,2] == 0 & venn.df_hs[,3] == 1)),
-                                 cbind(`18C` = 1, NH4 = 0, 
-                                       Counts = sum(venn.df_hs[,2] == 1 & venn.df_hs[,3] == 0)),
-                                 cbind(`18C` = 1, NH4 = 1, 
-                                       Counts = sum(rowSums(venn.df_hs[,-1]) == 2)))
-
-venn.plot_hs <- cbind.data.frame(venn.plot_hs, x = c(2, 1.4, -1.4, 0), y = c(-1.5, 0, 0, 0))
-
-venn.out <- data.frame(x = c(-0.75, 0.75), y = c(0, 0), labels = c("18C", "NH4"))
-venn.out$labels <- factor(venn.out$labels, levels = c("18C", "NH4"))
-
-ggplot() +
-  geom_circle(data = venn.out, aes(x0 = x, y0 = y, r = 1.5, fill = labels), 
-              alpha = 0.85, linewidth = 1, colour = "gray30") + 
-  geom_text(data = venn.plot_hs, aes(x = x, y = y, label = Counts), size = 7) +
-  coord_fixed() + theme_void() + 
-  theme(legend.position = "bottom", 
-        legend.text = element_text(size = 18, color  = "black")) +
-  scale_fill_manual(values = col.cond[-1]) +
-  labs(fill = NULL)
-
-# Accumulated LFC - Histogram
-hist_cond <- rbind(cbind(subset(ress_hs.18C, DEO == 1), Condition = "18C"),
-                   cbind(subset(ress_hs.NH4, DEO == 1), Condition = "NH4"))
-
-ggplot(hist_cond, aes(x = abs(log2FoldChange), fill = Condition)) + 
-  geom_histogram(binwidth = 2, position = "dodge", alpha = 0.75, color = "gray30") +
-  theme_bw() + xlab("Absolute log2 Fold Change") + ylab("Number of DE Orthologs") +
-  scale_fill_manual(values = col.cond[-1]) +
-  theme(axis.text.y = element_text(size = 18, color  = "black"),
-        axis.title.x = element_text(size = 18, color  = "black"),
-        axis.title.y = element_text(size = 18, color  = "black"),
-        legend.text = element_text(size = 18, color  = "black"),
-        legend.title = element_text(size = 18, color  = "black"),
-        axis.text.x = element_text(size = 18, color  = "black")) 
-
-ress_hs.NH4
-d <- plotCounts(dds_hs, gene = "ko:K17987,ko:K21997", intgroup = "Condition", 
-                returnData = TRUE)
-
-ggplot(d, aes(x = Condition, y = count)) + 
-  geom_point(position = position_jitter(w = 0.1, h = 0))
-
-
-
+gg.pca.sp_hs
+ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/hs_PCA.png", bg = "white",
+       plot_grid(gg.pca_hs, gg.pca.sp_hs, nrow = 1, labels = c("a", "b"), label_size = 20, align = "hv"), 
+       width = 15, height = 6, dpi = 300)
 
 #
-
-
-
-
-
