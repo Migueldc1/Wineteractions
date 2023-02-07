@@ -15,7 +15,7 @@ rm(list = ls())
 # Set the project location as working directory
 setwd("~/../OneDrive - Universidad Complutense de Madrid (UCM)/Wineteractions/GitHub/Wineteractions")
 
-# Load Environment
+## Load Environment
 #load("Workflow/3_Meta-transcriptomics_analysis/Outputs/RData/RNAseq-meta.RData")
 #save.image("Workflow/3_Meta-transcriptomics_analysis/Outputs/RData/RNAseq-meta.RData")
 
@@ -89,8 +89,8 @@ read.GOdata <- function(file.ext, path.annot, cols) {
 #
 #### LOAD DATA ####
 
-ko_df <- read.emapper(path.count = "Data/RNAseq/Meta-transcriptomics/Count/eggnog", 
-                      path.orth = "Data/RNAseq/Meta-transcriptomics/Annotation/eggnog")
+ko_df <- read.emapper(path.count = "Data/Meta-transcriptomics/Count/eggnog", 
+                      path.orth = "Data/Meta-transcriptomics/Annotation/eggnog")
 
 ko_df.f <- ko_df[!grepl(",", ko_df$KEGG_ko),]
 
