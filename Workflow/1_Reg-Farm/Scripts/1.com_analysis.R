@@ -93,9 +93,9 @@ tax_GM[is.na(tax_GM)] <- "Unidentified"
 
 # Load WorldClim MAT data and crop the Spanish area
 climate1 <- getData("worldclim", var = "bio", res = 0.5, lon = -3.703790, 
-                   lat = 40.416775)
+                    lat = 40.416775)
 climate2 <- getData("worldclim", var = "bio", res = 0.5, lon = 3.703790, 
-                   lat = 40.416775)
+                    lat = 40.416775)
 climate <- mosaic(climate1, climate2, fun = mean)
 climate_crop <- crop(climate, extent(-10, 5, 35, 44))
 
@@ -123,8 +123,8 @@ ggplot() +
   new_scale("fill") +
   geom_point(data = sample_df, aes(x = Longitude, y = Latitude, fill = Origin), shape = 21, size = 3.5) +
   scale_fill_manual(values = c("#2ac219", "#19b7c2", "#dba54d", "#ae0e36", 
-                                "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
-  theme_void() +
+                                        "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
+                                          theme_void() +
   theme(legend.text = element_text(size = 12, color = "black"),
         legend.title = element_text(size = 14, color = "black"))
 
@@ -133,9 +133,9 @@ ggplot() +
 
 # Load WorldClim MAT data and crop the Spanish area
 altitude1 <- getData("worldclim", var = "alt", res = 0.5, lon = -3.703790, 
-                    lat = 40.416775)
+                     lat = 40.416775)
 altitude2 <- getData("worldclim", var = "alt", res = 0.5, lon = 3.703790, 
-                    lat = 40.416775)
+                     lat = 40.416775)
 altitude <- mosaic(altitude1, altitude2, fun = mean)
 altitude_crop <- crop(altitude, extent(-10, 5, 35, 44))
 
@@ -151,8 +151,8 @@ ggplot() +
   new_scale("fill") +
   geom_point(data = sample_df, aes(x = Longitude, y = Latitude, fill = Origin), shape = 21, size = 3.5) +
   scale_fill_manual(values = c("#2ac219", "#19b7c2", "#dba54d", "#ae0e36", 
-                               "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
-  theme_void() +
+                                        "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
+                                          theme_void() +
   theme(legend.text = element_text(size = 12, color = "black"),
         legend.title = element_text(size = 14, color = "black"))
 
@@ -208,10 +208,10 @@ ggplot(asv.t_plot,
        aes(x = Sample_name, y = value, fill = factor(Genus, levels = orderG))) + 
   geom_bar(stat = "identity", position = "stack") + 
   scale_fill_manual(name = "Genus", values = c("#ccebc5", "#ffff33", "#e6ab02", "#80b1d3",
-                                               "#e6f5c9", "#ff7f00", "#fff2ae",
-                                               "#8da0cb", "#b15928", "#bebada", "#1b9e77",
-                                               "#fbb4ae", "#6a3d9a", "#bf5b17")) +
-  theme_minimal() + 
+                                                        "#e6f5c9", "#ff7f00", "#fff2ae",
+                                                        "#8da0cb", "#b15928", "#bebada", "#1b9e77",
+                                                        "#fbb4ae", "#6a3d9a", "#bf5b17")) +
+                                                          theme_minimal() + 
   theme(legend.position = "bottom", 
         legend.text.align = 0,
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 18, color = "black"),
@@ -343,8 +343,8 @@ nMDS_GM.plot <- merge(nMDS_GM.plot, sample_df, by = "Seq_ID")
 ggplot(nMDS_GM.plot) + 
   geom_point(aes(x = MDS1, y = MDS2, color = Origin, shape = Farming), size = 4) +
   scale_color_manual(values = c("#2ac219", "#19b7c2", "#dba54d", "#ae0e36", 
-                                "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
-  annotate(geom = "text", x = 0.4, y = 0.35, label = round(nMDS_GM$stress, 3), size = 7) +
+                                         "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
+                                           annotate(geom = "text", x = 0.4, y = 0.35, label = round(nMDS_GM$stress, 3), size = 7) +
   theme_bw() +
   theme(axis.text.y = element_text(size = 20, color = "black"),
         axis.title.x = element_text(size = 20, color = "black"),
@@ -441,8 +441,8 @@ must_pca.plot <- merge(sample_df, must_pca.plot, by = "row.names")
 ggplot(must_pca.plot) + 
   geom_point(aes(x = PC1, y = PC2, color = Origin, shape = Farming), size = 4) +
   scale_color_manual(values = c("#2ac219", "#19b7c2", "#dba54d", "#ae0e36", 
-                                "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
-  xlab(paste("PC1: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[1], "%", sep = "")) +
+                                         "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
+                                           xlab(paste("PC1: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[1], "%", sep = "")) +
   ylab(paste("PC2: ", round(((must_pca$sdev)^2 / sum((must_pca$sdev)^2))*100, 2)[2], "%", sep = "")) +
   theme_bw() +
   theme(axis.text.y = element_text(size = 22, color = "black"),
@@ -504,8 +504,8 @@ ggplot() +
                arrow = arrow(length = unit(0.2,"cm")), size = 1, alpha = 0.8) + 
   geom_text(data = arrowmat, aes(x = CAP1*2.25, y = CAP2*2.25, label = Sample), size = 6) +
   scale_color_manual(values = c("#2ac219", "#19b7c2", "#dba54d", "#ae0e36", 
-                                "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
-  theme_bw() +
+                                         "#433254", "#5900ff", "#7802a3", "#8849d1", "#9d0dd1")) +
+                                           theme_bw() +
   theme(axis.text.y = element_text(size = 22, color = "black"),
         axis.title.x = element_text(size = 24, color = "black"),
         axis.title.y = element_text(size = 24, color = "black"),

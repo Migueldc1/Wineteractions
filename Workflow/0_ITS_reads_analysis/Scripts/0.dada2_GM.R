@@ -3,7 +3,7 @@
 # Project: Wineteractions - ITS sequence analysis of GM samples
 
 # Set the project location as working directory
-setwd("C:/Users/Laboratorio14/OneDrive - Universidad Complutense de Madrid (UCM)/Wineteractions/GitHub/Wineteractions/0_ITS-GM/")
+setwd("~/../OneDrive - Universidad Complutense de Madrid (UCM)/Wineteractions/GitHub/Wineteractions/")
 
 #### LIBRARIES ####
 library(dada2)
@@ -31,7 +31,7 @@ primerHits <- function(primer, fn) {
 
 #
 #### GETTING READY ####
-path <- "Inputs/ITS_reads"
+path <- "Data/Sequencing/Raw Reads/ITS_reads/Total"
 
 fnFs <- sort(list.files(file.path(path, "R1"), pattern = ".fastq.gz", full.names = TRUE))
 fnRs <- sort(list.files(file.path(path, "R2"), pattern = ".fastq.gz", full.names = TRUE))
@@ -138,13 +138,13 @@ track.cut <- cbind.data.frame(track.cut, perc = track.cut[,6]*100/track.cut[,1])
 #
 #### ASSIGN TAXONOMY ####
 taxa.cut <- assignTaxonomy(seqtab.nochim, 
-                           "Inputs/Databases/sh_general_release_dynamic_10.05.2021.fasta")
+                           "Data/Sequencing/Databases/sh_general_release_dynamic_10.05.2021.fasta")
 
 #
 #### SAVE DATA ####
-save.image("dada2_GM.RData")
+save.image("Workflow/0_ITS_reads_analysis/Outputs/RData/dada2_GM.RData")
 
-saveRDS(taxa.cut, "Outputs/tax_GM.rds")
-saveRDS(seqtab.nochim, "Outputs/ASV_GM.rds")
-write.table(track.cut, "Outputs/track_GM.txt", sep = "\t", dec = ",")
+saveRDS(taxa.cut, "Workflow/0_ITS_reads_analysis/Outputs/RData/tax_GM.rds")
+saveRDS(seqtab.nochim, "Workflow/0_ITS_reads_analysis/Outputs/RData/ASV_GM.rds")
+write.table(track.cut, "Workflow/0_ITS_reads_analysis/Outputs/RData/track_GM.txt", sep = "\t", dec = ",")
 

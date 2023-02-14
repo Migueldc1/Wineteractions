@@ -99,6 +99,7 @@ kegg_df <- read.table("Data/RNAseq/Meta-transcriptomics/Annotation/KEGG_names.tx
                       sep = "\t", header = TRUE, quote = "")
 
 go_df <- read.GOdata(".emapper.annotations", "Data/RNAseq/Meta-transcriptomics/Annotation/eggnog", c("KEGG_ko", "GOs"))
+saveRDS(go_df, "Workflow/3_Meta-transcriptomics_analysis/Outputs/RData/go_df.rds")
 
 ## SAMPLE DATA
 sample_df <- read.table("Data/Metadata/sample_SGM.txt", sep = "\t", header = TRUE)
@@ -307,6 +308,22 @@ ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/genus_summary.p
 plotCounts(dds_gen, "ko:K13076", intgroup = "Genus")
 
 #
+### EXPORT DEG LIST
+
+DEG_lt.sc_df <- subset(ress_lt.sc, padj <= 0.05 & abs(log2FoldChange) >= 1)[,c(1,3)]
+DEG_lt.sc_df$OverExpr <- ifelse(DEG_lt.sc_df$log2FoldChange > 0, "Lachancea", "Saccharomyces")
+
+DEG_hs.sc_df <- subset(ress_hs.sc, padj <= 0.05 & abs(log2FoldChange) >= 1)[,c(1,3)]
+DEG_hs.sc_df$OverExpr <- ifelse(DEG_hs.sc_df$log2FoldChange > 0, "Hanseniaspora", "Saccharomyces")
+
+ko.deg_df <- merge(DEG_lt.sc_df[,-2], DEG_hs.sc_df[,-2], by = "KEGG_ko", all = TRUE)
+ko.deg_df$OverExpr <- ifelse(is.na(ko.deg_df$OverExpr.x) & !is.na(ko.deg_df$OverExpr.y), ko.deg_df$OverExpr.y, 
+                             ifelse(is.na(ko.deg_df$OverExpr.y) & !is.na(ko.deg_df$OverExpr.x), ko.deg_df$OverExpr.x, 
+                                    ifelse(ko.deg_df$OverExpr.x == "Saccharomyces", ko.deg_df$OverExpr.y, 
+                                           ifelse(ko.deg_df$OverExpr.y == "Saccharomyces", ko.deg_df$OverExpr.x, "Lt&Hs"))))
+
+saveRDS(ko.deg_df, "Workflow/3_Meta-transcriptomics_analysis/Outputs/RData/ko.deg_df.rds")
+
 ## BIOLOGICAL ENRICHMENT - Gene Ontology BP
 count.bias <- rowSums(ko_df.gen[,-1])
 names(count.bias) <- ko_df.gen[,1]
@@ -705,5 +722,10 @@ gg.pca.sp_hs
 ggsave("Workflow/3_Meta-transcriptomics_analysis/Outputs/Figures/hs_PCA.png", bg = "white",
        plot_grid(gg.pca_hs, gg.pca.sp_hs, nrow = 1, labels = c("a", "b"), label_size = 20, align = "hv"), 
        width = 15, height = 6, dpi = 300)
+
+#
+#### EXPORT COUNTS ####
+ko.n_df <- counts(dds_tot, normalized = TRUE)
+saveRDS(ko.n_df, "Workflow/3_Meta-transcriptomics_analysis/Outputs/RData/ko.n_df.rds")
 
 #
