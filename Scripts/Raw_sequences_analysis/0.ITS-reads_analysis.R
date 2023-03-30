@@ -34,7 +34,8 @@ primerHits <- function(primer, fn) {
 #
 #### GETTING READY ####
 
-sample_df <- read.table("Data/Metadata/sample_ID.txt", header = TRUE)
+sample_GM <- read.table("Data/Metadata/sample_GM.txt", header = TRUE, sep = "\t")
+sample_SGM <- read.table("Data/Metadata/sample_SGM.txt", header = TRUE, sep = "\t")
 
 path <- "Data/Sequencing/Raw_Reads/"
 
@@ -94,7 +95,7 @@ plotQualityProfile(fnRs.cut[sample(1:length(sample.names), 3)])
 filtFs <- file.path(path, "R1/Remove.primers/filtered", basename(fnFs))
 filtRs <- file.path(path, "R2/Remove.primers/filtered", basename(fnRs))
 
-out.cut <- filterAndTrim(fnFs.cut, filtFs, fnRs.cut, filtRs, truncLen = c(220,125),
+out.cut <- filterAndTrim(fnFs.cut, filtFs, fnRs.cut, filtRs, truncLen = c(220,150),
                          maxN = 0, maxEE = c(2,2), truncQ = 2, rm.phix = TRUE,
                          compress = TRUE, verbose = TRUE) 
 
@@ -144,7 +145,7 @@ track.cut <- cbind.data.frame(track.cut, perc = track.cut[,6]*100/track.cut[,1])
 #
 #### ASSIGN TAXONOMY ####
 taxa.cut <- assignTaxonomy(seqtab.nochim, 
-                           "Data/Sequencing/Databases/sh_general_release_dynamic_10.05.2021.fasta")
+                           "Data/Sequencing/Databases/sh_general_release_dynamic_s_29.11.2022.fasta")
 
 #
 #### EXPORT TABLES ####
@@ -152,7 +153,7 @@ taxa.cut <- assignTaxonomy(seqtab.nochim,
 write.table(track.cut, "Data/Sequencing/Outputs/track_GM.txt", sep = "\t", dec = ",")
 
 ## GM
-asv_GM <- seqtab.nochim[row.names(seqtab.nochim) %in% subset(sample_df, Assay == "GM")$Sample_ID, ]
+asv_GM <- seqtab.nochim[row.names(seqtab.nochim) %in% sample_GM$Seq_ID, ]
 asv_GM <- asv_GM[,colSums(asv_GM) > 0]
 taxa.cut_GM <- taxa.cut[colnames(asv_GM),]
 
@@ -160,7 +161,7 @@ saveRDS(taxa.cut_GM, "Data/Sequencing/Outputs/tax_GM.rds")
 saveRDS(asv_GM, "Data/Sequencing/Outputs/ASV_GM.rds")
 
 ## SGM
-asv_SGM <- seqtab.nochim[row.names(seqtab.nochim) %in% subset(sample_df, Assay == "SGM")$Sample_ID, ]
+asv_SGM <- seqtab.nochim[row.names(seqtab.nochim) %in% sample_SGM$Sample_ID, ]
 asv_SGM <- asv_SGM[,colSums(asv_SGM) > 0]
 taxa.cut_SGM <- taxa.cut[colnames(asv_SGM),]
 

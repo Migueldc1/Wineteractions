@@ -48,6 +48,7 @@ sample_df <- read.table("Data/Metadata/sample_GM.txt", sep = "\t", header = TRUE
 sample_df$Condition <- factor(sample_df$Condition, levels = c("Control", "18C", "NH4", "SO2"))
 sample_df$Origin <- factor(sample_df$Origin, levels = c("RdG", "VLP", "LM", "M", "R1", "R2", "R3A", "R3B", "R3C"))
 sample_df$Region <- factor(sample_df$Region, levels = c("Ribera del Guadiana", "Valdepeñas", "La Mancha", "Madrid", "Rioja"))
+sample_df$Farming <- ifelse(sample_df$Farming == "ECO", "Organic", "Conventional")
 
 sample_df <- subset(sample_df, Stage == "0_initial")
 
@@ -77,7 +78,7 @@ asv.t_GM.p <- melt(asv.t_GM)
 colnames(asv.t_GM.p) <- c("Id", "Seq_ID", "value")
 asv.t_GM.p <- merge(asv.t_GM.p, tax_GM[,c(6,8)], by = "Id")
 
-asv.t_GM.p <- merge(asv.t_GM.p, sample_df[c(1:4)], by = "Seq_ID")
+asv.t_GM.p <- merge(asv.t_GM.p, sample_df[c(1:5)], by = "Seq_ID")
 
 ## Genus
 asv.t_plot <- aggregate(asv.t_GM.p$value, list(asv.t_GM.p$Seq_ID, asv.t_GM.p$Genus), sum)
@@ -93,23 +94,23 @@ orderG <- append(orderG, c("Other", "Unidentified"))
 
 asv.t_plot <- merge(asv.t_plot, sample_df[,1:4], by = "Seq_ID")
 
-asv.t_plot$Farming <- ifelse(asv.t_plot$Farming == "ECO", "Ecological", "Conventional")
-
 gg.gen <- ggplot(asv.t_plot, 
-       aes(x = Condition, y = value, fill = factor(Genus, levels = orderG))) + 
+                 aes(x = Condition, y = value, fill = factor(Genus, levels = orderG))) + 
   geom_bar(stat = "identity", position = "stack") + 
-  scale_fill_manual(name = "Genus", values = c("#ccebc5", "#ffff33", "#e6ab02", "#80b1d3", "#e6f5c9", "#ff7f00", "#fff2ae",
-                                               "#8da0cb", "#b15928", "#bebada", "#1b9e77", "#fbb4ae", "#6a3d9a", "#bf5b17")) +
+  scale_fill_manual(name = "Genus", values = c("#b15928", "#ccebc5", "#ffff33", "#e6ab02", "#80b1d3", "#bf5b17", "#e6f5c9", 
+                                               "#ff7f00", "#fff2ae", "#8da0cb", "#bebada", "#1b9e77", "#fbb4ae", "#6a3d9a")) +
   guides(fill = guide_legend(ncol = 1)) + 
   facet_grid(Farming ~ Origin) +
-  xlab("") + ylab("Abundance") +
+  ylab("Abundance") +
   theme_bw() + 
   theme(legend.position = "right", 
         legend.text.align = 0,
         aspect.ratio = 2,
         axis.title.y = element_text(size = 16, color = "black"),
-        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 15, color = "black"),
         axis.text.y = element_text(size = 15, color = "black"),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
         strip.text = element_text(size = 16, color = "black"),
         strip.background = element_rect(fill = "white"),
         legend.text = element_text(size = 14, color = "black"),
@@ -135,8 +136,9 @@ for (var in unique(alpha_GM.plot$variable)) {
   
   alpha_sub <- subset(alpha_GM.plot, variable == var)
   wilcox_df <- rbind(wilcox_df,
-                     cbind.data.frame(variable = var, p.value = wilcox.test(alpha_sub[alpha_sub$Farming == "CONV", "value"],
-                                                                            alpha_sub[alpha_sub$Farming == "ECO", "value"])$p.value))
+                     cbind.data.frame(variable = var, 
+                                      p.value = wilcox.test(alpha_sub[alpha_sub$Farming == "Conventional", "value"],
+                                                            alpha_sub[alpha_sub$Farming == "Organic", "value"])$p.value))
   
 }
 
@@ -144,8 +146,6 @@ alpha_GM.plot <- merge(alpha_GM.plot, wilcox_df, by = "variable")
 alpha_GM.plot$p.value <- ifelse(alpha_GM.plot$p.value <= 0.001, "***",
                                 ifelse(alpha_GM.plot$p.value <= 0.01, "**",
                                        ifelse(alpha_GM.plot$p.value <= 0.05, "*", "")))
-
-alpha_GM.plot$Farming <- ifelse(alpha_GM.plot$Farming == "ECO", "Ecological", "Conventional")
 
 ## Management
 gg.alpha_far <- ggplot(data = alpha_GM.plot, aes(x = Farming, y = value)) +
@@ -156,7 +156,7 @@ gg.alpha_far <- ggplot(data = alpha_GM.plot, aes(x = Farming, y = value)) +
   theme_bw() +
   theme(aspect.ratio = 2,
         axis.text.y = element_text(size = 15, color = "black"),
-        axis.text.x = element_text(size = 15, angle = -30, color = "black", vjust = 0.5, hjust = 0.20),
+        axis.text.x = element_text(size = 15, color = "black", vjust = 0.5, hjust = 0.20, angle = -30),
         strip.text = element_text(size = 15, color = "black"),
         strip.background = element_rect(fill = "white"))
 
@@ -207,7 +207,7 @@ adonis2(bray_gen ~ Origin*Farming, data = sample_df)
 
 gg.figure1 <- plot_grid(gg.gen, plot_grid(gg.alpha_far, gg.nmds.gen_bray, rel_widths = c(1, 1.25), labels = c("B", "C"), 
                                           label_size = 18), 
-                        ncol = 1, rel_heights = c(1.33, 1), labels = c("A"), label_size = 18)
+                        ncol = 1, rel_heights = c(1, 1), labels = c("A"), label_size = 18)
 gg.figure1
 
 ggsave("Figures/Figure_1.png", gg.figure1, bg = "white", width = 14, height = 10)

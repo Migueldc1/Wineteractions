@@ -1,7 +1,8 @@
-.Rproj.user
+.Rproj
 .Rhistory
 .RData
 .Ruserdata
+.gitignore
 *RData
 Data/Meta-transcriptomics
 Data/Sequencing/Raw_Reads
@@ -9,3 +10,4 @@ Data/Sequencing/Databases
 Data/Sequencing/Outputs/track_GM.txt
 Data/Sequencing/cutadapt.exe
 Previous_versions
+.Rproj.user

@@ -100,8 +100,6 @@ go_df <- read.GOdata(".emapper.annotations", "Data/Meta-transcriptomics/Annotati
 ## TAXONOMY DATA
 tax_rna <- read.table("Data/Meta-transcriptomics/bracken.report.txt", check.names = FALSE)
 
-tax_KO <- read.table("Data/Meta-transcriptomics/contig_tax.txt", check.names = FALSE)
-
 tax_ITS <- as.data.frame(readRDS("Data/Sequencing/Outputs/tax_SGM.rds"))
 tax_ITS[is.na(tax_ITS)] <- "Unidentified"
 asv_ITS <- readRDS("Data/Sequencing/Outputs/ASV_SGM.rds")
@@ -115,7 +113,7 @@ sample_df$Condition <- factor(sample_df$Condition, levels = c("Control", "18C", 
 
 ## COLORS
 col_cond <- c("#bf2c45", "#1e74eb", "#ebb249", "#93bf2c")
-col_genus <- c("#caf55d", "#5df5cc", "#cc3939", "#cab2d6", "#8da0cb", "#d5eb26", "#1b9e77",
+col_genus <- c("#caf55d", "#ed3460", "#5df5cc", "#cc3939", "#cab2d6", "#8da0cb", "#d5eb26", "#1b9e77",
                         "#f78e4d", "#e6d8bd", "#6a3d9a", "#c05b17")
 
 #
@@ -128,12 +126,8 @@ tax_SGM$Genus <- gsub("g__", "", tax_SGM$Genus)
 tax_rna <- cbind.data.frame(Genus = colsplit(row.names(tax_rna), pattern = " ", names = c("Genus", "to.rm"))[1], tax_rna)
 tax_rna <- aggregate(. ~ Genus, tax_rna, sum)
 
-tax_KO <- cbind.data.frame(Genus = row.names(tax_KO), tax_KO)
-
-
 tax_plot <- rbind(cbind.data.frame(melt(tax_SGM), Assay = "ITS"),
-                  cbind.data.frame(melt(tax_rna), Assay = "RNA reads"),
-                  cbind.data.frame(melt(tax_KO), Assay = "Contigs"))
+                  cbind.data.frame(melt(tax_rna), Assay = "RNA reads"))
 
 tax_plot[tax_plot$value < 0.025, "Genus"] <- "Other"
 tax_plot <- aggregate(value ~ Genus + variable + Assay, tax_plot, sum)
@@ -156,16 +150,18 @@ gg.tax <- ggplot(tax_plot,
   scale_fill_manual(name = "Genus", values = col_genus) +
   facet_grid(Assay ~ Origin) +
   guides(fill=guide_legend(nrow = 2)) +
-  xlab("") + ylab("Abundance") +
+  ylab("Abundance") +
   theme_bw() + 
   theme(legend.position = "bottom",
+        axis.title.x = element_blank(),
         axis.title.y = element_text(size = 16, color = "black"),
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 13, color = "black"),
         axis.text.y = element_text(size = 13, color = "black"),
         strip.text = element_text(size = 15, color = "black"),
         strip.background = element_rect(fill = "white"),
         legend.text = element_text(size = 14, color = "black"),
-        legend.title = element_text(size = 15, color = "black"))
+        legend.title = element_text(size = 15, color = "black"),
+        legend.margin = margin(t = -0.25))
 
 gg.tax
 
@@ -198,9 +194,11 @@ percentVar_tot <- round(100 * attr(pcaData_tot, "percentVar"), 2)
 
 # Samples are separated by dominant species
 gg.pca_gen <- ggplot(pcaData_tot, aes(PC1, PC2, color = Genus)) +
-  geom_point(size = 4) + 
+  geom_point(size = 4) +
+  scale_color_manual(values = c("#cc3939", "#8da0cb", "#1b9e77", "gray70")) + 
   xlab(paste0("PC1: ", percentVar_tot[1],"% variance")) +
   ylab(paste0("PC2: ", percentVar_tot[2],"% variance")) + 
+  guides(color = guide_legend(nrow = 2)) +
   theme_bw() + 
   theme(legend.position = "bottom",
         aspect.ratio = 1,
@@ -209,8 +207,8 @@ gg.pca_gen <- ggplot(pcaData_tot, aes(PC1, PC2, color = Genus)) +
         axis.text.y = element_text(size = 15, color = "black"),
         axis.text.x = element_text(size = 15, color = "black"),
         legend.title = element_text(size = 17, color = "black"),
-        legend.text = element_text(size = 15, color = "black")) +
-  scale_color_manual(values = c("#cc3939", "#8da0cb", "#1b9e77", "gray70"))
+        legend.text = element_text(size = 15, color = "black"),
+        legend.margin = margin(b = -0.25))
 
 gg.pca_gen
 
@@ -282,7 +280,8 @@ gg.venn_gen <- ggplot() +
   geom_text(data = venn.plot_gen, aes(x = x, y = y, label = Counts), size = 7) +
   coord_fixed() + theme_void() + 
   theme(legend.position = "none", 
-        legend.text = element_text(size = 13, color  = "black")) +
+        legend.text = element_text(size = 13, color  = "black"),
+        plot.margin = margin(0.25, 0.25, 0.25, 0.25)) +
   scale_fill_manual(values = c("#8da0cb", "#cc3939")) +
   labs(fill = NULL)
 
@@ -336,11 +335,11 @@ gg.go_gen
 #
 #### EXPORT FIGURE 3 ####
 
-gg.figure3 <- plot_grid(gg.tax, plot_grid(gg.pca_gen, plot_grid(gg.venn_gen, gg.go_gen, ncol = 1, rel_heights = c(0.4, 1),
+gg.figure3 <- plot_grid(gg.tax, plot_grid(gg.pca_gen, plot_grid(gg.venn_gen, gg.go_gen, ncol = 1, rel_heights = c(0.45, 1),
                                                                 labels = c("C", "D"), label_size = 18), labels = "B", label_size = 18), 
-                        labels = "A", label_size = 18, ncol = 1)
+                        labels = "A", label_size = 18, ncol = 1, rel_heights = c(0.75, 1))
 gg.figure3
 
-ggsave("Figures/Figure_3.png", gg.figure3, bg = "white", width = 16, height = 16)
+ggsave("Figures/Figure_3.png", gg.figure3, bg = "white", width = 14, height = 13)
 
 #
