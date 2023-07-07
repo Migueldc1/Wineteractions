@@ -232,68 +232,15 @@ gg.hist_sc <- ggplot(hist_cond, aes(x = abs(log2FoldChange), fill = Condition)) 
 gg.hist_sc
 
 
-## BIOLOGICAL ENRICHMENT - Gene Ontology BP
-count.bias <- rowSums(ko_sc[,-1])
-names(count.bias) <- ko_sc[,1]
 
-DEG_sc.18C <- as.integer(ress_sc.18C$padj < 0.05 & abs(ress_sc.18C$log2FoldChange) >= 1)
-names(DEG_sc.18C) <- ress_sc.18C$KEGG_ko
-
-pwf_sc.18C <- nullp(DEgenes = DEG_sc.18C, bias.data = count.bias[names(DEG_sc.18C)])
-go_sc.18C <- goseq(pwf_sc.18C, gene2cat = go_df, test.cats = c("GO:BP"))
-go_sc.18C <- subset(go_sc.18C, ontology == "BP" & numDEInCat > 0)
-
-enrichGO_sc.18C <- go_sc.18C[p.adjust(go_sc.18C$over_represented_pvalue, method = "fdr") < 0.05,]
-
-DEG_sc.NH4 <- as.integer(ress_sc.NH4$padj < 0.05 & abs(ress_sc.NH4$log2FoldChange) >= 1)
-names(DEG_sc.NH4) <- ress_sc.NH4$KEGG_ko
-
-pwf_sc.NH4 <- nullp(DEgenes = DEG_sc.NH4, bias.data = count.bias[names(DEG_sc.NH4)])
-go_sc.NH4 <- goseq(pwf_sc.NH4, gene2cat = go_df)
-go_sc.NH4 <- subset(go_sc.NH4, ontology == "BP" & numDEInCat > 0)
-
-enrichGO_sc.NH4 <- go_sc.NH4[p.adjust(go_sc.NH4$over_represented_pvalue, method = "fdr") < 0.05,]
-
-DEG_sc.SO2 <- as.integer(ress_sc.SO2$padj < 0.05 & abs(ress_sc.SO2$log2FoldChange) >= 1)
-names(DEG_sc.SO2) <- ress_sc.SO2$KEGG_ko
-DEG_sc.SO2[is.na(DEG_sc.SO2)] <- 0
-
-pwf_sc.SO2 <- nullp(DEgenes = DEG_sc.SO2, bias.data = jitter(rep(1000, length(DEG_sc.SO2))))
-go_sc.SO2 <- goseq(pwf_sc.SO2, gene2cat = go_df)
-go_sc.SO2 <- subset(go_sc.SO2, ontology == "BP" & numDEInCat > 0)
-
-enrichGO_sc.SO2 <- go_sc.SO2[p.adjust(go_sc.SO2$over_represented_pvalue, method = "fdr") < 0.05,]
-
-# Plot
-go_sc <- rbind.data.frame(cbind(enrichGO_sc.18C, Comparison = "18C"),
-                          cbind(enrichGO_sc.NH4, Comparison = "NH4"))
-
-go_sc$comp.cat <- ifelse(duplicated(go_sc$term) | duplicated(go_sc$term, fromLast = TRUE), "Both", go_sc$Comparison)
-
-go_sc$term <- factor(go_sc$term, levels = unique(go_sc$term[order(go_sc$comp.cat, go_sc$numDEInCat, decreasing = TRUE)]))
-
-gg.go_sc <- ggplot(go_sc) +
-  geom_bar(aes(x = term, y = numDEInCat, fill = Comparison), stat = "identity", position = "dodge") + 
-  scale_fill_manual(values = c("#1e74eb", "#ebb249")) +
-  coord_flip() +
-  theme_bw()+
-  theme(legend.position = "none",
-        axis.text.y = element_text(size = 13, color = "black"),
-        axis.title.x = element_text(size = 15, color = "black"),
-        legend.text = element_text(size = 13, color = "black"),
-        legend.title = element_text(size = 15, color = "black"),
-        axis.text.x = element_text(size = 13, color = "black")) + 
-  ylab("DE Orthologs")  + xlab("")
-
-gg.go_sc
 
 #
-#### EXPORT FIGURE 4 ####
+#### EXPORT FIGURE 5 ####
 
-gg.figure4 <- plot_grid(plot_grid(gg.venn_sc, gg.hist_sc, labels = c("A", "B"), label_size = 18), 
+gg.figure5 <- plot_grid(plot_grid(gg.venn_sc, gg.hist_sc, labels = c("A", "B"), label_size = 18), 
                         gg.go_sc, rel_heights = c(1, 1.5), labels = c(NA, "C"), label_size = 18, ncol = 1)
-gg.figure4
+gg.figure5
 
-ggsave("Figures/Figure_4.png", gg.figure4, bg = "white", width = 13, height = 12)
+ggsave("Figures/Figure_5.png", gg.figure5, bg = "white", width = 12.6, height = 11)
 
 #

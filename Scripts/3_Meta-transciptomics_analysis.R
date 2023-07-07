@@ -144,12 +144,14 @@ tax_plot$Assay <- factor(tax_plot$Assay, levels = c("ITS", "RNA reads", "Contigs
 tax_plot$Sample_ID <- factor(tax_plot$Sample_ID, levels = c("CONV Control", "CONV 18C", "CONV NH4", "CONV SO2", 
                                                             "ECO Control", "ECO 18C", "ECO NH4", "ECO SO2"))
 
+tax_plot$Condition <- factor(tax_plot$Condition, levels = c("Control", "18C", "NH4", "SO2"))
+
 gg.tax <- ggplot(tax_plot, 
-       aes(x = Sample_ID, y = value, fill = factor(Genus, levels = orderG))) + 
+                     aes(x = Condition, y = value, fill = factor(Genus, levels = orderG))) + 
   geom_bar(stat = "identity", position = "stack") + 
   scale_fill_manual(name = "Genus", values = col_genus) +
-  facet_grid(Assay ~ Origin) +
-  guides(fill=guide_legend(nrow = 2)) +
+  facet_grid(Assay ~ Origin + Farming) +
+  guides(fill = guide_legend(nrow = 2)) +
   ylab("Abundance") +
   theme_bw() + 
   theme(legend.position = "bottom",
@@ -164,6 +166,15 @@ gg.tax <- ggplot(tax_plot,
         legend.margin = margin(t = -0.25))
 
 gg.tax
+
+#
+#### EXPORT FIGURE S3 ####
+
+gg.figureS3 <- gg.tax
+gg.figureS3
+
+ggsave("Figures/Figure_S3.png", gg.figureS3, bg = "white", width = 12.6, height = 5)
+
 
 #
 #### PCA - GLOBAL ####
@@ -192,6 +203,8 @@ pcaData_tot <- plotPCA(vst_tot, intgroup = "Genus", returnData = TRUE)
 pcaData_tot$Genus <- factor(pcaData_tot$Genus, levels = c("Hanseniaspora", "Lachancea", "Saccharomyces", "Other"))
 percentVar_tot <- round(100 * attr(pcaData_tot, "percentVar"), 2)
 
+pcaData_tot <- merge(pcaData_tot, sample_df[,1:4], by.x = "name", by.y = "Sample_ID")
+
 # Samples are separated by dominant species
 gg.pca_gen <- ggplot(pcaData_tot, aes(PC1, PC2, color = Genus)) +
   geom_point(size = 4) +
@@ -201,16 +214,34 @@ gg.pca_gen <- ggplot(pcaData_tot, aes(PC1, PC2, color = Genus)) +
   guides(color = guide_legend(nrow = 2)) +
   theme_bw() + 
   theme(legend.position = "bottom",
-        aspect.ratio = 1,
+        legend.margin = margin(t = -0.25, r = 0, b = 0, l = 0, unit = "cm"),
         axis.title.y = element_text(size = 17, color = "black"),
         axis.title.x = element_text(size = 17, color = "black"),
         axis.text.y = element_text(size = 15, color = "black"),
         axis.text.x = element_text(size = 15, color = "black"),
-        legend.title = element_text(size = 17, color = "black"),
-        legend.text = element_text(size = 15, color = "black"),
-        legend.margin = margin(b = -0.25))
+        legend.title = element_text(size = 15, color = "black"),
+        legend.text = element_text(size = 14, color = "black"))
 
 gg.pca_gen
+
+# Effect of fermentative condition
+gg.pca_con <- ggplot(pcaData_tot, aes(PC1, PC2, color = Condition)) +
+  geom_point(size = 4) +
+  scale_color_manual(values = col_cond) + 
+  xlab(paste0("PC1: ", percentVar_tot[1],"% variance")) +
+  ylab(paste0("PC2: ", percentVar_tot[2],"% variance")) + 
+  guides(color = guide_legend(nrow = 2)) +
+  theme_bw() + 
+  theme(legend.position = "bottom",
+        legend.margin = margin(t = -0.25, r = 0, b = 0, l = 0, unit = "cm"),
+        axis.title.y = element_text(size = 17, color = "black"),
+        axis.title.x = element_text(size = 17, color = "black"),
+        axis.text.y = element_text(size = 15, color = "black"),
+        axis.text.x = element_text(size = 15, color = "black"),
+        legend.title = element_text(size = 15, color = "black"),
+        legend.text = element_text(size = 14, color = "black"))
+
+gg.pca_con
 
 #
 #### DIFFERENTIAL ANALYSIS - GLOBAL ####
@@ -287,6 +318,25 @@ gg.venn_gen <- ggplot() +
 
 gg.venn_gen
 
+# Accumulated LFC - Histogram
+hist_cond <- rbind(cbind(subset(ress_lt.sc, DEO == 1), Genus = "Lachancea"),
+                   cbind(subset(ress_hs.sc, DEO == 1), Genus = "Hanseniaspora"))
+
+gg.hist_gen <- ggplot(hist_cond, aes(x = abs(log2FoldChange), fill = Genus)) + 
+  geom_histogram(binwidth = 2, position = "dodge", alpha = 0.75, color = "gray30") +
+  theme_bw() + xlab("Absolute log2 Fold Change") + ylab("Number of DE Orthologs") +
+  scale_fill_manual(values = c("#cc3939", "#8da0cb")) +
+  theme(legend.position = "bottom",
+        axis.text.y = element_text(size = 14, color  = "black"),
+        axis.title.x = element_text(size = 16, color  = "black"),
+        axis.title.y = element_text(size = 16, color  = "black"),
+        legend.text = element_text(size = 15, color  = "black"),
+        legend.title = element_text(size = 16, color  = "black"),
+        axis.text.x = element_text(size = 14, color  = "black")) 
+
+gg.hist_gen
+
+#
 ## BIOLOGICAL ENRICHMENT - Gene Ontology BP
 count.bias <- rowSums(ko_df.gen[,-1])
 names(count.bias) <- ko_df.gen[,1]
@@ -325,21 +375,54 @@ gg.go_gen <- ggplot(go_gen) +
   coord_flip() +
   theme_bw()+
   theme(legend.position = "none",
-        axis.text.y = element_text(size = 13, color = "black"),
-        axis.title.x = element_text(size = 15, color = "black"),
-        axis.text.x = element_text(size = 13, color = "black")) + 
+        axis.text.y = element_text(size = 15, color = "black"),
+        axis.title.x = element_text(size = 17, color = "black"),
+        axis.text.x = element_text(size = 15, color = "black")) + 
   ylab("DE Orthologs")  + xlab("")
 
 gg.go_gen
 
 #
-#### EXPORT FIGURE 3 ####
+#### EXPORT FIGURE 4 ####
 
-gg.figure3 <- plot_grid(gg.tax, plot_grid(gg.pca_gen, plot_grid(gg.venn_gen, gg.go_gen, ncol = 1, rel_heights = c(0.45, 1),
-                                                                labels = c("C", "D"), label_size = 18), labels = "B", label_size = 18), 
-                        labels = "A", label_size = 18, ncol = 1, rel_heights = c(0.75, 1))
-gg.figure3
+gg.figure4 <- plot_grid(plot_grid(gg.pca_con, gg.pca_gen, labels = c("A", "B"), label_size = 18), 
+                        gg.go_gen, rel_heights = c(1, 1.35), ncol = 1, labels = c(NA, "C"), label_size = 18)
+gg.figure4
 
-ggsave("Figures/Figure_3.png", gg.figure3, bg = "white", width = 14, height = 13)
+ggsave("Figures/Figure_4.png", gg.figure4, bg = "white", width = 12.6, height = 12)
+
+
+#
+#### EXPORT FIGURE S4 ####
+
+gg.figureS4 <- plot_grid(gg.venn_gen, gg.hist_gen, ncol = 1, rel_heights = c(0.66, 1), labels = c("A", "B"), label_size = 18)
+gg.figureS4
+
+ggsave("Figures/Figure_S4.png", gg.figureS4, bg = "white", width = 7, height = 7)
+
+
+#
+#### EXPORT DATA ####
+
+# Sample data
+saveRDS(sample_df, "Data/Metadata/sample_SGM.rds")
+
+# Normalized ortholog table
+ko.n_df <- counts(dds_tot, normalized = TRUE)
+saveRDS(ko.n_df, "Data/Meta-transcriptomics/ko.n_df.rds")
+
+
+##To rm
+DEO.gen_df <- merge(ress_lt.sc[,c(1,9,3)], ress_hs.sc[,c(1,9,3)], by = "KEGG_ko", all = TRUE)
+colnames(DEO.gen_df) <- c("KEGG_ko", "DEO.Lt", "LFC.Lt", "DEO.Hs", "LFC.Hs")
+
+DEO.gen_df$OverExpr <- ifelse(DEO.gen_df$DEO.Lt == 1 & DEO.gen_df$LFC.Lt > 0, "Lachancea", "None")
+DEO.gen_df$OverExpr <- ifelse(DEO.gen_df$DEO.Hs == 1 & DEO.gen_df$LFC.Hs > 0, 
+                             ifelse(DEO.gen_df$OverExpr == "Lachancea", "Lt&Hs", "Hanseniaspora"), DEO.gen_df$OverExpr)
+DEO.gen_df$OverExpr <- ifelse(!DEO.gen_df$OverExpr %in% c("Lachancea", "Hanseniaspora", "Lt&Hs") & 
+                                DEO.gen_df$DEO.Lt + DEO.gen_df$DEO.Hs > 0, 
+                             "Saccharomyces", DEO.gen_df$OverExpr)
+
+saveRDS(DEO.gen_df, "Data/Meta-transcriptomics/DEO.gen_df.rds")
 
 #

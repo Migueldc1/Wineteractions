@@ -51,6 +51,8 @@ sample_df$Region <- factor(sample_df$Region, levels = c("Ribera del Guadiana", "
 sample_df$Farming <- ifelse(sample_df$Farming == "ECO", "Organic", "Conventional")
 
 sample_df <- subset(sample_df, Stage == "0_initial")
+row.names(sample_df) <- sample_df$Seq_ID
+sample_df <- sample_df[row.names(asv_GM),]
 
 
 ## Community data
@@ -105,7 +107,6 @@ gg.gen <- ggplot(asv.t_plot,
   theme_bw() + 
   theme(legend.position = "right", 
         legend.text.align = 0,
-        aspect.ratio = 2,
         axis.title.y = element_text(size = 16, color = "black"),
         axis.text.y = element_text(size = 15, color = "black"),
         axis.title.x = element_blank(),
@@ -117,6 +118,21 @@ gg.gen <- ggplot(asv.t_plot,
         legend.title = element_text(size = 15, color = "black"))
 
 gg.gen
+
+
+### STATISTICs
+
+asv.t_GM.g <- melt(asv.t_GM)
+colnames(asv.t_GM.g) <- c("Id", "Seq_ID", "value")
+asv.t_GM.g <- merge(asv.t_GM.g, tax_GM[,c(6,8)], by = "Id")
+
+asv.t_GM.g <- merge(asv.t_GM.g, sample_df[c(1:5)], by = "Seq_ID")
+
+asv.t_GM.g <- aggregate(value ~ Seq_ID + Genus + Farming, asv.t_GM.g, sum)
+
+wilcox.test(subset(asv.t_GM.g, Genus == "Lachancea" & Farming == "Conventional")$value,
+            subset(asv.t_GM.g, Genus == "Lachancea" & Farming == "Organic")$value)
+
 
 #
 #### ALPHA DIVERSITY ANALYSIS ####
@@ -154,9 +170,8 @@ gg.alpha_far <- ggplot(data = alpha_GM.plot, aes(x = Farming, y = value)) +
   facet_wrap(~variable, scales = "free_y", nrow = 1) +
   ylab("") + xlab("") + 
   theme_bw() +
-  theme(aspect.ratio = 2,
-        axis.text.y = element_text(size = 15, color = "black"),
-        axis.text.x = element_text(size = 15, color = "black", vjust = 0.5, hjust = 0.20, angle = -30),
+  theme(axis.text.y = element_text(size = 15, color = "black"),
+        axis.text.x = element_text(size = 15, color = "black", vjust = 1, hjust = 0.2, angle = -35),
         strip.text = element_text(size = 15, color = "black"),
         strip.background = element_rect(fill = "white"))
 
@@ -189,8 +204,7 @@ gg.nmds.gen_bray <- ggplot(nMDS_gen.plot) +
   theme_bw() +
   guides(shape = guide_legend(override.aes = list(size = c(3, 1))),
          color = guide_legend(override.aes = list(shape = 16, size = 3))) +
-  theme(aspect.ratio = 0.66,
-        axis.text.y = element_text(size = 16, color = "black"),
+  theme(axis.text.y = element_text(size = 16, color = "black"),
         axis.title.x = element_text(size = 17, color = "black"),
         axis.title.y = element_text(size = 17, color = "black"),
         legend.text = element_text(size = 15, color = "black"),
@@ -210,5 +224,6 @@ gg.figure1 <- plot_grid(gg.gen, plot_grid(gg.alpha_far, gg.nmds.gen_bray, rel_wi
                         ncol = 1, rel_heights = c(1, 1), labels = c("A"), label_size = 18)
 gg.figure1
 
-ggsave("Figures/Figure_1.png", gg.figure1, bg = "white", width = 14, height = 10)
+ggsave("Figures/Figure_1.png", gg.figure1, bg = "white", width = 12.6, height = 9)
 
+#
