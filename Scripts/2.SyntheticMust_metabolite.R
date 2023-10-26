@@ -110,7 +110,7 @@ gg.tax.rna_SGM
 dom.gen_sgm <- aggregate(Abundance ~ Sample_ID, rna_sgm.genus_plot, max)
 dom.gen_sgm <- merge(rna_sgm.genus_plot, dom.gen_sgm, by = c("Sample_ID", "Abundance"))
 
-metabolite_sgm <- merge(sample_sgm, dom.gen_sgm[,c(1,3)], by = "Sample_ID")
+metabolite_sgm <- merge(sample_sgm[,-5], dom.gen_sgm[,c(1,3)], by = "Sample_ID")
 metabolite_sgm$Genus <- ifelse(metabolite_sgm$Genus %in% c("Hanseniaspora", "Lachancea", "Saccharomyces"),
                                metabolite_sgm$Genus, "Other")
 
@@ -139,7 +139,8 @@ for (var in levels(metabolite.sgm_plot$variable)) {
 anova_df$variable <- factor(anova_df$variable, levels = levels(metabolite.sgm_plot$variable))
 
 gg.meta.sgm_sgm <- ggplot(metabolite.sgm_plot) +
-  geom_boxplot(aes(x = Genus, y = value, color = Genus), size = 1, show.legend = FALSE) +
+  geom_jitter(aes(x = Genus, y = value, color = Genus), size = 2, show.legend = FALSE) +
+  geom_boxplot(aes(x = Genus, y = value, color = Genus), size = 1, show.legend = FALSE, alpha = 0.75) +
   geom_label(data = anova_df, aes(x = Genus, y = Inf, label = groups), vjust = 1,
              fill = "white", alpha = 0.5, label.size = NA, size = 6.5) +
   scale_color_manual(values = c("#1b9e77", "#8da0cb", "#cc3939", "gray70")) +
@@ -256,7 +257,7 @@ ggsave("Figures/Figure_S3.png", gg.figureS3, bg = "white", width = 10, height = 
 ################################################################################ SUPPLEMENTARY FIGURE S4 ####
 #### METABOLITE PROFILE BOXPLOT - CONDITION ####
 
-metabolite_plot <- melt(sample_sgm[,-c(7,15)])
+metabolite_plot <- melt(sample_sgm[,-c(8,16)])
 
 metabolite_plot$variable <- factor(metabolite_plot$variable, 
                                    levels = c("Glucose", "Fructose", "Ethanol", "Glycerol",  "pH", 
@@ -279,7 +280,8 @@ for (var in levels(metabolite_plot$variable)) {
 anova_df$variable <- factor(anova_df$variable, levels = levels(metabolite_plot$variable))
 
 gg.meta_sgm <- ggplot(metabolite_plot) +
-  geom_boxplot(aes(x = Condition, y = value, color = Condition), size = 1, show.legend = FALSE) +
+  geom_jitter(aes(x = Condition, y = value, color = Condition), size = 2, show.legend = FALSE) +
+  geom_boxplot(aes(x = Condition, y = value, color = Condition), size = 1, show.legend = FALSE, alpha = 0.75) +
   geom_label(data = anova_df, aes(x = Genus, y = Inf, label = groups), vjust = 1,
              fill = "white", alpha = 0.5, label.size = NA, size = 6.5) +
   scale_color_manual(values = col_condition) +
@@ -315,7 +317,7 @@ grid::grid.draw(gg.meta_sgm)
 gg.figureS4 <- gg.meta_sgm
 grid::grid.draw(gg.figureS4)
 
-ggsave("Figures/Figure_S4.png", gg.figureS3, bg = "white", width = 12.6, height = 14)
+ggsave("Figures/Figure_S4.png", gg.figureS4, bg = "white", width = 12.6, height = 14)
 
 #
 ################################################################################ SUPPLEMENTARY FIGURE S5 ####
