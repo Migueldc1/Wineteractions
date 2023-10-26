@@ -4,10 +4,12 @@
 .Ruserdata
 .gitignore
 *RData
-Data/Meta-transcriptomics
+Data/Meta-transcriptomics/Annotation
+Data/Meta-transcriptomics/Count
 Data/Sequencing/Raw_Reads
 Data/Sequencing/Databases
 Data/Sequencing/Outputs/track_GM.txt
 Data/Sequencing/cutadapt.exe
-Previous_versions
+Data/Map
+Figures/Inkscape
 .Rproj.user
