@@ -151,7 +151,7 @@ gg.figure4
 ggsave("Figures/Figure_4.png", gg.figure4, bg = "white", width = 9, height = 10)
 
 #
-################################################################################ SUPPLEMENTARY FIGURE S7 ####
+################################################################################ SUPPLEMENTARY FIGURE S8 ####
 #### METABOLITE PRODUCTION - CONDITION ####
 
 metabolite_sc <- melt(sample_sc[,c(4,6:23)])
@@ -195,10 +195,10 @@ for (i in 1:length(strip_both)) {
 grid::grid.draw(gg.meta_sc)
 
 #
-#### EXPORT FIGURE S7 ####
+#### EXPORT FIGURE S8 ####
 
-gg.figureS7 <- gg.meta_sc
+gg.figureS8 <- gg.meta_sc
 
-ggsave("Figures/Figure_S7.png", gg.figureS7, bg = "white", width = 12.6, height = 6)
+ggsave("Figures/Figure_S8.png", gg.figureS8, bg = "white", width = 12.6, height = 6)
 
 #

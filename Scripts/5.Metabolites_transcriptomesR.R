@@ -224,7 +224,7 @@ ggsave("Figures/Inkscape/Figure_5.pdf", gg.figure5, bg = "white", width = 12.6, 
 
 
 #
-################################################################################ SUPPLEMENTARY TABLE S4 ####
+################################################################################ SUPPLEMENTARY FILE S1 ####
 #### ORTHOLOG - METABOLITE TABLE ####
 
 ko.sgm.info_df <- merge(ko.sgm.node_df[,1:2], kegg_df, by.x = "names", by.y = "KEGG_ko")
@@ -240,130 +240,78 @@ ko.sgm.info_df <- ko.sgm.info_df[complete.cases(ko.sgm.info_df), -3]
 ko.sgm.info_df <- ko.sgm.info_df[order(ko.sgm.info_df$Metabolite, ko.sgm.info_df$Module),]
 
 #
-#### EXPORT TABLE S4 ####
+#### EXPORT FILE S1 ####
 
 write.table(ko.sgm.info_df, "Figures/Table_S4.txt", sep = "\t", row.names = FALSE, dec = ",")
 
 #
-################################################################################ SUPPLEMENTARY FIGURE S7 ####
-#### BIOLOGICAL ENRICHMENT - MODULE 1 ####
+################################################################################ SUPPLEMENTARY FIGURE S9 ####
+#### MODULES vs EXPERIMENTAL CONDITIONS ####
 
-count.bias <- rowSums(ko.n_df)
+ko.sgm.mods_df <- Reduce(function(x,y) merge(x,y, by = "Sample_ID"), 
+                         list(ko.sgm.mod1_df[,1:2], ko.sgm.mod2_df[,1:2], ko.sgm.mod3_df[,1:2], ko.sgm.mod4_df[,1:2]))
 
-## Module 1
-DEG_mod1 <- ifelse(names(count.bias) %in% subset(ko.sgm.node_df, membership == 2)$names, 1, 0)
-names(DEG_mod1) <- names(count.bias)
+colnames(ko.sgm.mods_df) <- c("Sample_ID", "Module.1", "Module.2", "Module.3", "Module.4")
 
-pwf_mod1 <- nullp(DEgenes = DEG_mod1, bias.data = count.bias[names(DEG_mod1)])
-go_mod1 <- goseq(pwf_mod1, gene2cat = go_df, test.cats = c("GO:BP"))
-go_mod1 <- subset(go_mod1, ontology == "BP")
+ko.sgm.mods_df <- merge(sample_df[,c(1:4,23)], ko.sgm.mods_df, by = "Sample_ID")
 
-enrichGO_mod1 <- go_mod1[p.adjust(go_mod1$over_represented_pvalue, method = "fdr") < 0.05,]
-enrichGO_mod1$term <- factor(enrichGO_mod1$term, 
-                             levels = unique(enrichGO_mod1$term[order(enrichGO_mod1$numDEInCat, decreasing = TRUE)]))
+summary(aov(Module.1 ~ Condition, ko.sgm.mods_df))
+summary(aov(Module.2 ~ Condition, ko.sgm.mods_df))
+summary(aov(Module.3 ~ Condition, subset(ko.sgm.mods_df, Genus == "Saccharomyces")))
+summary(aov(Module.4 ~ Condition, ko.sgm.mods_df))
 
-gg.go_mod1 <- ggplot(enrichGO_mod1) +
-  geom_bar(aes(x = term, y = numDEInCat), stat = "identity", position = "dodge", fill = "deepskyblue") + 
-  coord_flip() +
-  theme_bw()+
-  theme(legend.position = "none",
-        axis.text.y = element_text(size = 15, color = "black"),
-        axis.title.x = element_text(size = 17, color = "black"),
-        axis.text.x = element_text(size = 15, color = "black")) + 
-  ylab("DE Orthologs")  + xlab("")
+ko.sgm.mods_df.plot <- melt(ko.sgm.mods_df)
 
-gg.go_mod1
+## ANOVA
+anova_df <- NULL
+for (var in levels(ko.sgm.mods_df.plot$variable)) {
+  
+  groups <- agricolae::LSD.test(aov(value ~ Condition, data = subset(ko.sgm.mods_df.plot, variable == var)), "Condition")$groups
+  groups$Genus <- row.names(groups)
+  groups$nosig <- ifelse(sum(grepl("a", groups$groups)) == 4, NA, groups$groups)
+  groups$groups <- ifelse(is.na(groups$nosig), NA, groups$groups)
+  anova_df <- rbind(anova_df, cbind.data.frame(variable = var, groups))
+  
+}
 
-#
-#### BIOLOGICAL ENRICHMENT - MODULE 2 ####
+gg.ko.mods_sgm <- ggplot(ko.sgm.mods_df.plot) +
+  geom_jitter(aes(x = Condition, y = value, color = Condition), size = 2, show.legend = FALSE) +
+  geom_boxplot(aes(x = Condition, y = value, color = Condition), size = 1, show.legend = FALSE, alpha = 0.75) +
+  geom_label(data = anova_df, aes(x = Genus, y = Inf, label = groups), vjust = 1,
+             fill = "white", alpha = 0.5, label.size = NA, size = 6.5) +
+  scale_color_manual(values = c("#bf2c45", "#1e74eb", "#ebb249", "#93bf2c")) +
+  facet_wrap(~ variable, ncol = 2, scales = "free_y") +
+  ylab("") +
+  theme_bw() +
+  theme(axis.text.y = element_text(size = 15, color = "black"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 15, color = "black"),
+        axis.text.x = element_text(size = 15, color = "black", angle = 90, hjust = 1, vjust = 0.5),
+        strip.background = element_rect(fill = "white"),
+        strip.text = element_text(size = 16, color = "black"))
 
-## Module 2
-DEG_mod2 <- ifelse(names(count.bias) %in% subset(ko.sgm.node_df, membership == 4)$names, 1, 0)
-names(DEG_mod2) <- names(count.bias)
+## Set Strip background colors
+gg.ko.mods_sgm <- ggplot_gtable(ggplot_build(gg.ko.mods_sgm))
 
-pwf_mod2 <- nullp(DEgenes = DEG_mod2, bias.data = count.bias[names(DEG_mod2)])
-go_mod2 <- goseq(pwf_mod2, gene2cat = go_df, test.cats = c("GO:BP"))
-go_mod2 <- subset(go_mod2, ontology == "BP" & numDEInCat > 10)
+strip_both <- which(grepl("strip-", gg.ko.mods_sgm$layout$name))
+fills <- alpha(c("deepskyblue", "yellowgreen", "#910a25", "sienna1"), 
+               alpha = 0.75)
 
-enrichGO_mod2 <- go_mod2[p.adjust(go_mod2$over_represented_pvalue, method = "fdr") < 0.05,]
-enrichGO_mod2$term <- factor(enrichGO_mod2$term, 
-                             levels = unique(enrichGO_mod2$term[order(enrichGO_mod2$numDEInCat, decreasing = TRUE)]))
+for (i in 1:length(strip_both)) {
+  
+  gg.ko.mods_sgm$grobs[[strip_both[i]]]$grobs[[1]]$children[[1]]$gp$fill <- fills[i]
+  
+}
 
-gg.go_mod2 <- ggplot(enrichGO_mod2) +
-  geom_bar(aes(x = term, y = numDEInCat), stat = "identity", position = "dodge", fill = "#9acd32") + 
-  coord_flip() +
-  theme_bw()+
-  theme(legend.position = "none",
-        axis.text.y = element_text(size = 15, color = "black"),
-        axis.title.x = element_text(size = 17, color = "black"),
-        axis.text.x = element_text(size = 15, color = "black")) + 
-  ylab("DE Orthologs")  + xlab("")
-
-gg.go_mod2
-
-#
-#### BIOLOGICAL ENRICHMENT - MODULE 3 ####
-
-## Module 3
-DEG_mod3 <- ifelse(names(count.bias) %in% subset(ko.sgm.node_df, membership == 5)$names, 1, 0)
-names(DEG_mod3) <- names(count.bias)
-
-pwf_mod3 <- nullp(DEgenes = DEG_mod3, bias.data = count.bias[names(DEG_mod3)])
-go_mod3 <- goseq(pwf_mod3, gene2cat = go_df, test.cats = c("GO:BP"))
-go_mod3 <- subset(go_mod3, ontology == "BP" & numDEInCat)
-
-enrichGO_mod3 <- go_mod3[p.adjust(go_mod3$over_represented_pvalue, method = "fdr") < 0.05,]
-enrichGO_mod3$term <- factor(enrichGO_mod3$term, 
-                             levels = unique(enrichGO_mod3$term[order(enrichGO_mod3$numDEInCat, decreasing = TRUE)]))
-
-gg.go_mod3 <- ggplot(enrichGO_mod3) +
-  geom_bar(aes(x = term, y = numDEInCat), stat = "identity", position = "dodge", fill = "#910a25") + 
-  scale_y_continuous(breaks = seq(2,10,4)) +
-  coord_flip() +
-  theme_bw()+
-  theme(legend.position = "none",
-        axis.text.y = element_text(size = 15, color = "black"),
-        axis.title.x = element_text(size = 17, color = "black"),
-        axis.text.x = element_text(size = 15, color = "black")) + 
-  ylab("DE Orthologs")  + xlab("")
-
-gg.go_mod3
+grid::grid.draw(gg.ko.mods_sgm)
 
 #
-#### BIOLOGICAL ENRICHMENT - MODULE 4 ####
+#### EXPORT SUPPLEMENTARY FIGURE S9 ####
 
-## Module 4
-DEG_mod4 <- ifelse(names(count.bias) %in% subset(ko.sgm.node_df, membership == 3)$names, 1, 0)
-names(DEG_mod4) <- names(count.bias)
+gg.figureS9 <- plot_grid(gg.ko.mods_sgm)
+gg.figureS9
 
-pwf_mod4 <- nullp(DEgenes = DEG_mod4, bias.data = count.bias[names(DEG_mod4)])
-go_mod4 <- goseq(pwf_mod4, gene2cat = go_df, test.cats = c("GO:BP"))
-go_mod4 <- subset(go_mod4, ontology == "BP")
-
-enrichGO_mod4 <- go_mod4[p.adjust(go_mod4$over_represented_pvalue, method = "fdr") < 0.05,]
-enrichGO_mod4$term <- factor(enrichGO_mod4$term, 
-                             levels = unique(enrichGO_mod4$term[order(enrichGO_mod4$numDEInCat, decreasing = TRUE)]))
-
-gg.go_mod4 <- ggplot(enrichGO_mod4) +
-  geom_bar(aes(x = term, y = numDEInCat), stat = "identity", position = "dodge", fill = "#ff8247") + 
-  coord_flip() +
-  theme_bw()+
-  theme(legend.position = "none",
-        axis.text.y = element_text(size = 15, color = "black"),
-        axis.title.x = element_text(size = 17, color = "black"),
-        axis.text.x = element_text(size = 15, color = "black")) + 
-  ylab("DE Orthologs")  + xlab("")
-
-gg.go_mod4
-
-#
-#### EXPORT FIGURE S8 ####
-
-gg.figureS8 <- plot_grid(plot_grid(gg.go_mod1, gg.go_mod3, ncol = 1, rel_heights = c(1,1), labels = c("A", "C"), label_size = 18), 
-                         plot_grid(gg.go_mod2, gg.go_mod4, ncol = 1, rel_heights = c(0.5,1.5), labels = c("B", "D"), label_size = 18), ncol = 2)
-gg.figureS8
-
-ggsave("Figures/Figure_S8.png", gg.figureS8, bg = "white", width = 18, height = 13)
+ggsave("Figures/Inkscape/Figure_S9.pdf", gg.figureS9, bg = "white", width = 10, height = 10)
 
 
 #

@@ -160,7 +160,7 @@ gg.meta.sgm_sgm <- ggplot_gtable(ggplot_build(gg.meta.sgm_sgm))
 
 strip_both <- which(grepl("strip-", gg.meta.sgm_sgm$layout$name))
 fills <- alpha(c("#82107a", "#82107a", "#82107a", "#82107a", "#30b3bf", "#30b3bf", "#82107a", "#82107a", "#30b3bf", 
-                 "#30b3bf", "#30b3bf", "#30b3bf", "#81c236", "#81c236", "#81c236", "#bbcc06", "#bbcc06", "#30b3bf"), 
+                 "#30b3bf", "#30b3bf", "#30b3bf", "#81c236", "#81c236", "#bbcc06", "#bbcc06"), 
                alpha = 0.75)
 
 for (i in 1:length(strip_both)) {
@@ -180,7 +180,7 @@ gg.figure2
 ggsave("Figures/Figure_2.png", gg.figure2, bg = "white", width = 12.6, height = 14)
 
 #
-################################################################################ SUPPLEMENTARY FIGURE S3 ####
+################################################################################ SUPPLEMENTARY FIGURE S5 ####
 #### PCA SYNTHETIC MUST - CONDITION ####
 
 sgm.pca_df <- sample_sgm[,c(9:13,16,17,6,18:23)]
@@ -246,15 +246,15 @@ adonis2(sgm_dist ~ Genus, data = sgm_pca.plot[row.names(sgm_dist),])
 
 
 #
-#### EXPORT FIGURE S3 ####
+#### EXPORT FIGURE S5 ####
 
-gg.figureS3 <- plot_grid(gg.sgm_pca, gg.sgm_pca.genus, ncol = 1, labels = c("A", "B"), label_size = 18)
-gg.figureS3
+gg.figureS5 <- plot_grid(gg.sgm_pca, gg.sgm_pca.genus, ncol = 1, labels = c("A", "B"), label_size = 18)
+gg.figureS5
 
-ggsave("Figures/Figure_S3.png", gg.figureS3, bg = "white", width = 10, height = 12)
+ggsave("Figures/Figure_S5.png", gg.figureS5, bg = "white", width = 10, height = 12)
 
 #
-################################################################################ SUPPLEMENTARY FIGURE S4 ####
+################################################################################ SUPPLEMENTARY FIGURE S6 ####
 #### METABOLITE PROFILE BOXPLOT - CONDITION ####
 
 metabolite_plot <- melt(sample_sgm[,-c(8,16)])
@@ -313,14 +313,14 @@ for (i in 1:length(strip_both)) {
 grid::grid.draw(gg.meta_sgm)
 
 #
-#### EXPORT FIGURE S4 ####
-gg.figureS4 <- gg.meta_sgm
-grid::grid.draw(gg.figureS4)
+#### EXPORT FIGURE S6 ####
+gg.figureS6 <- gg.meta_sgm
+grid::grid.draw(gg.figureS6)
 
-ggsave("Figures/Figure_S4.png", gg.figureS4, bg = "white", width = 12.6, height = 14)
+ggsave("Figures/Figure_S6.png", gg.figureS6, bg = "white", width = 12.6, height = 14)
 
 #
-################################################################################ SUPPLEMENTARY FIGURE S5 ####
+################################################################################ SUPPLEMENTARY FIGURE S3 ####
 #### TAXONOMIC PROFILE SYNTHETIC MUST - RNA vs ITS ####
 
 ## ITS
@@ -369,10 +369,10 @@ gg.genus_sgm <- ggplot(tax_sgm.comp,
 gg.genus_sgm
 
 #
-#### EXPORT FIGURE S5 ####
+#### EXPORT FIGURE S3 ####
 
-gg.figureS5 <- gg.genus_sgm
+gg.figureS3 <- gg.genus_sgm
 
-ggsave("Figures/Figure_S5.png", gg.figureS3, bg = "white", width = 12.6, height = 6)
+ggsave("Figures/Figure_S3.png", gg.figureS3, bg = "white", width = 12.6, height = 6)
 
 #

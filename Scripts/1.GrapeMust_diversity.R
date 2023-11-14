@@ -396,55 +396,6 @@ gg.figureS2 <- gg.gm.ac_pca2
 ggsave("Figures/Figure_S2.png", gg.figureS2, bg = "white", width = 7, height = 7)
 
 #
-################################################################################ SUPPLEMENTARY FIGURE S3 ####
-#### BOXPLOT - GRAPE MUST ####
-
-gm.df_plot <- merge(sample_df[,c(1,3:5)], gm.pca_df2, by.x = "Sample_ID", by.y = "row.names")
-gm.df_plot <- melt(gm.df_plot[gm.df_plot$Origin != "RdG", -5], id.vars = c("Sample_ID", "Origin", "Farming", "Condition"))
-gm.df_plot$Scale <- ifelse(gm.df_plot$Origin %in% across_wa, "Across WA", "Within WA")
-
-gm.df_plot$variable <- factor(gm.df_plot$variable, levels = c("Sugars", "Ammonia", "PAN", "Malic_acid"))
-
-## WILCOXON TEST
-wilcox_df <- NULL
-for (var in levels(gm.df_plot$variable)) {
-  for (sc in unique(gm.df_plot$Scale)) {
-    
-    metab_sub.conv <- subset(gm.df_plot, variable == var & Scale == sc & Farming == "Conventional")
-    metab_sub.org <- subset(gm.df_plot, variable == var & Scale == sc & Farming == "Organic")
-    
-    wilcox_df <- rbind(wilcox_df,
-                       cbind.data.frame(variable = var, Scale = sc,
-                                        p.value = wilcox.test(metab_sub.conv$value, metab_sub.org$value, paired = TRUE)$p.value))
-  }
-}
-
-wilcox_df$p.value <- ifelse(wilcox_df$p.value <= 0.001, "***",
-                            ifelse(wilcox_df$p.value <= 0.01, "**",
-                                   ifelse(wilcox_df$p.value <= 0.05, "*", "")))
-
-## PLOT
-gg.gm_box <- ggplot() + 
-  geom_jitter(data = gm.df_plot[gm.df_plot$variable != "pH_must",], aes(x = Farming, y = value), size = 2) +
-  geom_boxplot(data = gm.df_plot[gm.df_plot$variable != "pH_must",], aes(x = Farming, y = value), size = 1, alpha = 0.75) +
-  facet_wrap(~ Scale + variable, scales = "free_y", nrow = 2) +
-  geom_text(data = wilcox_df, aes(x = 1.5, y = Inf, label = p.value), hjust = 0.5, vjust = 1.25, size = 8) +
-  theme_bw() +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 16, color = "black"),
-        axis.title.y = element_blank(),
-        axis.text.y = element_text(size = 16, color = "black"))
-
-gg.gm_box
-
-#
-#### EXPORT SUPPLEMENTARY FIGURE S2 ####
-
-gg.figureS3 <- gg.gm_box
-
-ggsave("Figures/Figure_S3.png", gg.figureS3, bg = "white", width = 7, height = 7)
-
-#
 ################################################################################ SUPPLEMENTARY TABLE S1 ####
 #### PERMANOVA - GRAPE MUST ####
 

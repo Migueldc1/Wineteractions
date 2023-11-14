@@ -173,7 +173,7 @@ gg.figure3
 ggsave("Figures/Figure_3.png", gg.figure3, bg = "white", width = 8, height = 15)
 
 #
-################################################################################ FIGURE 3 ####
+################################################################################ SUPPLEMENTARY FIGURE S7 ####
 #### PCA GLOBAL - CONDITION ####
 
 gg.pca_con <- ggplot(pcaData_sgm, aes(PC1, PC2, color = Condition)) +
@@ -195,11 +195,11 @@ gg.pca_con <- ggplot(pcaData_sgm, aes(PC1, PC2, color = Condition)) +
 gg.pca_con
 
 #
-#### EXPORT SUPPLEMENTARY FIGURE S6 ####
+#### EXPORT SUPPLEMENTARY FIGURE S7 ####
 
-gg.figureS6 <- gg.pca_con
-gg.figureS6
+gg.figureS7 <- gg.pca_con
+gg.figureS7
 
-ggsave("Figures/Figure_S6.png", gg.figureS6, bg = "white", width = 8, height = 8)
+ggsave("Figures/Figure_S7.png", gg.figureS7, bg = "white", width = 8, height = 8)
 
 #
