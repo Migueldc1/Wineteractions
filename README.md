@@ -17,5 +17,3 @@ Microbial Interactions and Ecology Lab - [MINElab](http://minelab.bioucm.es/)
 [@MigueldCe](https://twitter.com/MigueldCe) - migueldc@ucm.es
 
 [https://github.com/Migueldc1/Wineteractions](https://github.com/Migueldc1/Wineteractions/)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
