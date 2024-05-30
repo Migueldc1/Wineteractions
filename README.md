@@ -14,7 +14,7 @@ Currently available as a preprint at [bioRxiv](https://doi.org/10.1101/2023.12.0
 
 ### Sampling design
 
-<img src="/Figures/Map.png" width="350" align="left"> </img>  We surveyed five distinct Spanish wine appellations, sampling grapes from vineyards under conventional and organic management. We also sampled at lower geographic scales to finely disentangle whether grape must and fungal variability was distance dependent. The file `0.Sampling_design.R` describe how to draw the sampling map presented. We collected grapes from five different grapevine plants, making a composite sample from each sampling point which were pressed under sterile conditions and the resulting grape must was dispensed into sterile glass bottles. 
+<img src="/Figures/Map.png" width="350" align="left"> </img>  We surveyed five distinct Spanish wine appellations, sampling grapes from vineyards under conventional and organic management. We also sampled at lower geographic scales to finely disentangle whether grape must and fungal variability was distance dependent. The file `0.Sampling_design.R` describe how to draw the sampling map presented. We collected grapes from five different grapevine plants, making a composite sample from each sampling point which were pressed under sterile conditions and the resulting grape must was dispensed into sterile bottles. 
 
 <br clear="left"/>
 
