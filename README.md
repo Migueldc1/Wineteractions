@@ -1,6 +1,6 @@
 # Multi-omics framework to reveal the molecular determinants of fermentation performance in wine yeast populations
 
-## About the project
+## About the work
 ### Background
 Connecting the composition and function of industrial microbiomes is a major aspiration in microbial biotechnology. Here, we address this question in wine fermentation, a model system where the diversity and functioning of fermenting yeast species is determinant of the flavor and quality of the resulting wines.
 ### Results
@@ -10,7 +10,7 @@ Our study bridges the gap between yeast community composition and wine metabolit
 
 Currently available as a preprint at [bioRxiv](https://doi.org/10.1101/2023.12.02.569693)
 
-## About the repo
+## About the sampling effort and data analysis
 
 ### Sampling design
 
@@ -20,8 +20,32 @@ Currently available as a preprint at [bioRxiv](https://doi.org/10.1101/2023.12.0
 
 ### Observational study
 
+<p align="center">
+<img src="/Figures/GM.png" height=300 align="center">
+</p>
+<br clear="left"/>
+
+These fermentations were sampled immediately after being dispensed, at the tumultuous stage of fermentation (between 5-50% sugars consumed) and at the end of fermentations (weight loss remained consinstently below 0.01g per day). We used each sampled fermentation point for different purposes:
+  - The initial stage served as a comparison of yeast communities across different biogeographical origins, in vineyards subject to different farming systems. Besides, we also studied grape must composition, as it widely variable across different vineyards.
+  - The tumultuous stage of fermentation served as a selection of fermenting yeast communities to later inoculate the laboratory fermentations.
+  - With the final stage we aimed to assess which factor was more important for yeast community and wine metabolite composition at the end of fermentations. Thus, our sampling effort was focused on ITS amplicon sequencing and metabolite composition assessment.
+
+The files `1.GrapeMust_diversity.R` and `2.FermentedMust_metabolite.R` contains the necessary code to conduct these analysis. In addition, in the `Raw_sequences_analysis` the RScripts needed to analyse ITS raw sequences are can be found. 
 
 
+### Laboratory fermentations
+
+<p align="center">
+<img src="/Figures/SGM.png" height=300 align="center">
+</p>
+<br clear="left"/>
+
+These fermentations were subjected to the same fermentative conditions than the observational study. Besides, the yeast community of each control fermentation was used to inoculate this experiment. Here, we focused on the relationship between yeast community and metabolite production under homogenized media and environmental conditions. We conducted and RNAseq experiment to determine the (meta-)transcriptomic expression of each fermentation, yielding different metabolite profiles at the end of fermentations. It is important to note that we consider a fermentation ended when the community no longer consumes sugar. Even though from an enological point of view this comparison cannot be made, we are interested on the ecological significance of why some communities are able to consume all the sugars present and the metabolite profile associated. Thus, we sampled:
+ 
+  - At the tumultuous stage to evaluate the yeast community composition (ITS sequencing) and (meta-)transcriptomic profiles (RNAseq).
+  - At the end of fermentations to evaluate the metabolite profiles.
+
+The files `3.SyntheticMust_metabolite.R`, `4.Transcriptional_profiles.R`, `5.Transcriptional_profiles-Saccharomyces.R`, `6.Metabolites_transcriptomesR.R` contain all the code used for these analysis, and in the folder `Raw_sequences_analysis` you can find additional code used to analyse raw ITS and RNA sequences.
 
 ## Contact
 
