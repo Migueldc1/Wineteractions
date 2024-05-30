@@ -9,7 +9,7 @@ library(ggplot2)
 rm(list=ls()) #Clear R environment
 
 # Set the project location as working directory
-setwd("~/../OneDrive - Universidad Complutense de Madrid (UCM)/Proyecto - Wineteractions/GitHub/Wineteractions/")
+setwd("~/../OneDrive/Proyecto - Wineteractions/GitHub/Wineteractions/")
 
 #
 #### DATA LOADING ####
@@ -32,10 +32,7 @@ sp.gadm <- sp.gadm[!sp.gadm$NAME_1 %in% c("Ceuta y Melilla", "Islas Canarias", "
 
 # Draw the map
 gg.map_across <- ggplot() +
-  geom_sf(data = sp.gadm, aes(fill = NAME_1), color = NA, show.legend = FALSE) +
-  scale_fill_manual(values = alpha(c("#7ecf65", "#ccad5e", "#f7de9c", "#f7c67c", "#3c9e43",
-                                     "#a16bc7", "#de1e14", "#b00b29", "#ed5a5a", "#88a3bf", 
-                                     "#71d1c7", "#f2f291", "#919bf2", "#6c66d1", "#cc74bc"), alpha = 0.75)) +
+  geom_sf(data = sp.gadm, fill = alpha(c("#f7de9c"), alpha = 0.75), color = NA, show.legend = FALSE) +
   ggnewscale::new_scale_fill() +
   geom_point(data = sample_df, aes(x = Longitude, y = Latitude, fill = Origin, shape = Farming), size = 3.5, stroke = 1.5) +
   scale_fill_manual(values = c("#2ac219", "#9fffd1", "#dba54d", "#ae0e36", 
