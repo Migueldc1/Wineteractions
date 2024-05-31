@@ -51,8 +51,8 @@ The files `3.SyntheticMust_metabolite.R`, `4.Transcriptional_profiles.R`, `5.Tra
 
 ## Contact
 
-Microbial Interactions and Ecology Lab - [MINElab](http://minelab.bioucm.es/)
+<img align="left" height="20" src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg"> **migueldc@ucm.es**
 
-[@MigueldCe](https://twitter.com/MigueldCe) - migueldc@ucm.es
+<a href="http://minelab.bioucm.es/" target="blank"><img align="left" src="https://github.com/Migueldc1/Migueldc1/blob/main/Figures/Logo_MineLab.png" height="100" /></a>
 
-[https://github.com/Migueldc1/Wineteractions](https://github.com/Migueldc1/Wineteractions/)
+
